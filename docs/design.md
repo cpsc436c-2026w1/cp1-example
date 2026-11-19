@@ -4,59 +4,53 @@ Team t00, the rides case. Sections Workflows and Sketch were sections 4 and 5 of
 
 ## Sketch
 
-A text sketch in place of the drawing. Every element of it has a row in Resources below, or in the table of what
+![Sketch of the system](sketch.svg)
+
+Source: [sketch.puml](sketch.puml) (PlantUML). Every box is a row in [Resources](#resources), or in the table of what
 is outside our system.
-
-```
-OUTSIDE (the app, not ours)               OUR SYSTEM (team t00, ca-central-1)
-
-trips service ── trip events ───────────▶ stream t00-trip-events
-                                            ├─▶ function t00-count-requests ─▶ tables t00-zone-counts, t00-seen-events
-                                            ├─▶ function t00-track-trips ────▶ table t00-trips
-                                            └─▶ Firehose t00-trip-events-to-lake ─▶ bucket, raw/trip-events/
-                                                  job t00-compact-events: raw/trip-events/ ─▶ curated/trip_events/
-nightly export ── one CSV file a day ───▶ bucket, raw/trip-exports/
-                                                  job t00-curate-trips: raw/trip-exports/ ─▶ curated/trips/, curated/trips_rejected/
-trips service ── each accept ───────────▶ API t00-api ─▶ function t00-assign-trip ─▶ table t00-trips
-rider's and analyst's pages ── reads ───▶ API t00-api ─▶ function t00-read ──▶ tables t00-trips, t00-zone-counts
-analyst's page ── questions ────────────▶ API t00-api ─▶ function t00-assistant ─▶ Athena on database t00_lake
-```
 
 ## Workflows
 
-The app is not ours. Its trips service sends each trip event (requested, accepted, completed) to our stream within
-a second or so. Function `t00-count-requests` reads the stream and counts requests by pickup zone in 5-minute
-periods; a period holds the requests with an event time from its start up to, and not including, its end. A count
-is first stored within 60 s of the period's end, from the requests received by then; a late request corrects it, or
-stores it if the zone did not have a count for the period. For each request the
-function writes the event's id to `t00-seen-events`, with the condition that the id is not there yet, and adds 1 to
-the count, in one DynamoDB transaction: both writes happen or neither does
-([TransactWriteItems](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/transaction-apis.html)).
-When the function fails, Lambda sends it the same records again
-([error handling](https://docs.aws.amazon.com/lambda/latest/dg/kinesis-on-failure-destination.html)); a request
-that was already counted fails the condition and is not counted again. An id is kept for 24 hours, which is how
-long the stream keeps a record ([retention period](https://docs.aws.amazon.com/streams/latest/dev/kinesis-extended-retention.html)).
-That is the replay limit of RF010: a second delivery more than 24 hours after the first could be counted again,
-once DynamoDB has deleted the id, and we assume the app does not send one (Q030).
+Each workflow names the codes it serves and the components it uses; every component is a row in
+[Resources](#resources).
 
-Function `t00-track-trips` reads the same stream and keeps table `t00-trips` current: it adds each requested trip
-and records each completion with its fare. An accept needs an answer, so it does not come through the stream: the
-app's trips service sends each accept to our API as one request, and passes our answer to the driver's phone.
-Function `t00-assign-trip` runs once for each request. Two accepts for one trip are two runs that can overlap; each
-makes one conditional write to `t00-trips` (assign the driver if the trip does not have one), and the table lets
-one of the two succeed. The driver has the answer, assigned or refused, within 2 s of our API receiving the
-accept. After an answer of assigned, the app sends the `trip_accepted` event to the stream.
+### Counting requests · R010, R020, RF010, RF020
 
-Function `t00-read` answers the reads through the same API: the counts and the dashboard page for the analyst, and
-the driver and the fare of a trip for the rider.
+The trips service sends each trip event to the stream. The counting function counts requests by pickup zone in
+5-minute periods and stores each count within 60 s of the period's end; a late request corrects the count of its
+period. It writes each event's id together with the count, so an event delivered twice is counted once.
 
-The stream is also written to the lake as it arrives, about one file a minute. Every night at 00:30 UTC job
-`t00-compact-events` rewrites the day before as one Parquet file in table `trip_events_compacted`; the count by
-zone over 30 days reads that table (RF040). Every night the app exports the day's completed trips as one file; job
-`t00-curate-trips` loads the rows that have a fare above 0 into table `trips_curated` before 06:00 UTC and writes
-the rows it leaves out to `trips_rejected`. About 840 requests an hour come from our three zones in the morning
-rush (DQ02, from DS01); we assume 0.5 % of events arrive twice and 0.25 % arrive 6 to 10 minutes late (DQ05, our
-estimate: DS01 holds finished trips and does not say).
+Components: `t00-trip-events`, `t00-count-requests`, `t00-zone-counts`, `t00-seen-events`
+
+### Assigning trips · R070, R080, R090, R100, RF030
+
+The tracking function keeps each trip current from the stream. A driver's accept comes to the API as one request;
+the assign function makes one conditional write, so only one of two accepts for a trip is answered `assigned`,
+within 2 s.
+
+Components: `t00-trip-events`, `t00-track-trips`, `t00-api`, `t00-assign-trip`, `t00-trips`
+
+### Reading counts and trips · R030, R090, R100, RF020
+
+The read function answers the rider's and the analyst's pages through the API. A zone and period without a count
+is shown as no data, not as 0.
+
+Components: `t00-api`, `t00-read`, `t00-zone-counts`, `t00-trips`
+
+### Lake and nightly jobs · R040, R050, RF040
+
+Firehose writes the stream to the bucket about once a minute, and at 00:30 UTC the compaction job rewrites the day
+before as one Parquet file. The curation job loads the nightly export's completed trips with a fare above 0 before
+06:00 UTC and sets the other rows aside.
+
+Components: `t00-trip-events-to-lake`, `t00-lake-<account-id>`, `t00_lake`, `t00-compact-events`, `t00-curate-trips`
+
+### Questions to the assistant · R060
+
+The assistant answers the analyst's questions about counts by querying the lake with Athena, and states only
+counts it read.
+
+Components: `t00-api`, `t00-assistant`, `t00_lake`
 
 ## Correctness properties
 

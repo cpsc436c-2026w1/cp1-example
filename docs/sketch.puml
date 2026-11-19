@@ -1,0 +1,50 @@
+@startuml sketch
+' Sketch of team t00's system. Every box is a row in docs/design.md, Resources, or in the table of what is outside our system.
+left to right direction
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam roundCorner 6
+
+rectangle "Outside: the app, not ours" as outside {
+  agent "trips service" as svc
+  agent "nightly export" as export
+  agent "rider's and analyst's pages" as pages
+}
+
+rectangle "Our system: team t00, ca-central-1" as ours {
+  queue "t00-trip-events\n(Kinesis data stream)" as stream
+  component "t00-count-requests\n(Lambda)" as count
+  database "t00-zone-counts\nt00-seen-events\n(DynamoDB)" as counts
+  component "t00-track-trips\n(Lambda)" as track
+  database "t00-trips\n(DynamoDB)" as trips
+  component "t00-api\n(API Gateway)" as api
+  component "t00-assign-trip\n(Lambda)" as assign
+  component "t00-read\n(Lambda)" as read
+  component "t00-assistant\n(Lambda)" as assistant
+  component "t00-trip-events-to-lake\n(Firehose)" as firehose
+  storage "t00-lake-<account-id>\n(S3: raw/, curated/)\nt00_lake (Glue tables)" as lake
+  component "t00-compact-events\nt00-curate-trips\n(Glue jobs)" as jobs
+}
+
+svc --> stream : trip events
+svc --> api : each accept
+export --> lake : one CSV a day
+pages --> api : reads, questions
+
+stream --> count
+count --> counts
+stream --> track
+track --> trips
+stream --> firehose
+firehose --> lake
+lake --> jobs
+jobs --> lake
+api --> assign
+assign --> trips
+api --> read
+read --> trips
+read --> counts
+api --> assistant
+assistant --> lake : Athena
+@enduml
