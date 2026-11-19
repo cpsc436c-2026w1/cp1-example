@@ -114,7 +114,7 @@ On Monday all five are text: every path below is named, and no file under `sim/d
 exist. At Checkpoint 2 the generator writes the files of part (d) and behave loads each by its id.
 
 A number below is marked *measured* (we ran a query; the date and the tool are given), *given* (a source page
-states it) or *ours* (we chose it).
+states it) or *our choice* (we chose it).
 
 ### (a) Sources
 
@@ -204,8 +204,8 @@ Every event is one JSON object. Three fields are in every kind:
 
 | Field | Type | Example | Valid values | Comes from |
 |---|---|---|---|---|
-| `event_id` | text | `ev-000412` | any text; one id for one event, so the same id again is the same event | generated (ours) |
-| `event_type` | text | `trip_requested` | one of: `trip_requested`, `trip_accepted`, `trip_completed` | generated (ours) |
+| `event_id` | text | `ev-000412` | any text; one id for one event, so the same id again is the same event | generated (our choice) |
+| `event_type` | text | `trip_requested` | one of: `trip_requested`, `trip_accepted`, `trip_completed` | generated (our choice) |
 | `event_time` | UTC time | `2026-11-23T09:01:10Z` | any time: when it happened on the phone or in the app | see each kind |
 
 **`trip_requested`**: a rider asked for a trip.
@@ -213,10 +213,10 @@ Every event is one JSON object. Three fields are in every kind:
 | Field | Type | Example | Valid values | Comes from |
 |---|---|---|---|---|
 | `trip_id` | text | `t-0412` | any text; one id for one trip, the same in all its events | generated: one for each row of DS01 |
-| `rider_id` | text | `p-00317` | the id of a rider | generated (ours): DS01 does not have riders |
+| `rider_id` | text | `p-00317` | the id of a rider | generated (our choice): DS01 does not have riders |
 | `pickup_zone_id` | whole number | `161` | one of the zone ids of DS02 | DS01 `PULocationID` |
 | `dropoff_zone_id` | whole number | `230` | one of the zone ids of DS02 | DS01 `DOLocationID` |
-| `quoted_fare` | decimal | `27.13` | > 0, in USD | DS01 `base_passenger_fare` (ours: the quote equals the final fare) |
+| `quoted_fare` | decimal | `27.13` | > 0, in USD | DS01 `base_passenger_fare` (our choice: the quote equals the final fare) |
 | `event_time` | UTC time | `2026-11-23T09:01:10Z` | as above | DS01 `request_datetime`, moved to the simulated day (part d) |
 
 **`trip_accepted`**: a driver took the trip. On the stream it is the accept that our API answered with `assigned`; the body of an accept sent to the API has the same fields.
@@ -224,8 +224,8 @@ Every event is one JSON object. Three fields are in every kind:
 | Field | Type | Example | Valid values | Comes from |
 |---|---|---|---|---|
 | `trip_id` | text | `t-0412` | the id of a trip that was requested | as above |
-| `driver_id` | text | `d-0046` | the id of a driver | generated (ours): DS01 does not have drivers; 200 drivers |
-| `event_time` | UTC time | `2026-11-23T09:01:18Z` | as above | generated (ours): 3 to 15 s after the request |
+| `driver_id` | text | `d-0046` | the id of a driver | generated (our choice): DS01 does not have drivers; 200 drivers |
+| `event_time` | UTC time | `2026-11-23T09:01:18Z` | as above | generated (our choice): 3 to 15 s after the request |
 
 **`trip_completed`**: the driver closed the trip.
 
@@ -238,13 +238,13 @@ Every event is one JSON object. Three fields are in every kind:
 | `trip_time_s` | whole number | `670` | >= 0, in seconds | DS01 `trip_time` |
 | `fare` | decimal | `27.13` | > 0, in USD; a trip with a missing, 0 or negative fare is rejected (R050) | DS01 `base_passenger_fare` |
 | `driver_pay` | decimal | `20.35` | any amount, in USD | DS01 `driver_pay` |
-| `event_time` | UTC time | `2026-11-23T09:17:28Z` | as above | generated (ours): the accept, plus 5 minutes to the pickup, plus `trip_time_s` |
+| `event_time` | UTC time | `2026-11-23T09:17:28Z` | as above | generated (our choice): the accept, plus 5 minutes to the pickup, plus `trip_time_s` |
 
 **`delivery`**: one arrival of an event at our system. It has the fields of the event and:
 
 | Field | Type | Example | Valid values | Comes from |
 |---|---|---|---|---|
-| `received_time` | UTC time | `2026-11-23T09:01:11Z` | any time, not before the event time: set by our system when the event arrives; the folder in `raw/` follows it | generated (ours): 1 s after the event time unless a fault says otherwise |
+| `received_time` | UTC time | `2026-11-23T09:01:11Z` | any time, not before the event time: set by our system when the event arrives; the folder in `raw/` follows it | generated (our choice): 1 s after the event time unless a fault says otherwise |
 
 An injected fault is not a field of the event: the system under test must not be told. It is recorded beside the
 data, in `_truth/faults.jsonl`.
@@ -264,7 +264,7 @@ its rows are sampled and turned into events (part c), with the times moved to th
 | SIM02 | `quiet-zone` | event stream | DS01 (the sample); zone ids of DS02 | as SIM01 without its faults, less the trips below: 2,331 events | as SIM01 | `quiet`: every event of the 60 trips requested in zone 48 between 09:25 and 09:35 is left out | `sim/data/SIM02/` and `s3://t00-lake-<account-id>/sim/SIM02/`, laid out as `raw/trip-events/` |
 | SIM03 | `double-accept` | two concurrent writers | DS01 (the sample); zone ids of DS02 | the first 20 trips of zone 161: one request and two accepts each, from two different drivers: 60 rows. An accept is the body of a request to `POST /trips/{trip_id}/accept`, stored as a `trip_accepted` row; the example sends it to the API, not to the stream | the event times of a trip's two accepts differ by 1 or 2 s. The example sends the two accepts together: both requests are sent before either has an answer, so both conditional writes are under way before either is finished, and the table decides. Exactly one driver must get the trip. Both rows carry the same `received_time`; that marks the pair and is not what makes the accepts concurrent | `later-first`: for 10 of the 20 trips the accept with the later event time is first in the file; the order in the file does not decide who wins (Q020) | `sim/data/SIM03/` and `s3://t00-lake-<account-id>/sim/SIM03/`, laid out as `raw/trip-events/` |
 | SIM04 | `trips-day` | batch file | DS01 (the subset); zone ids of DS02 | one CSV file with the trips of zones 48, 161 and 230 completed on 2024-03-13 that have a fare above 0, as rows of `trip_completed` dated 2026-11-22: 18,593 rows (*measured*) | one file a night, arriving at 05:10 UTC | `bad-fare`: 3 of the rows do not have a fare above 0 (one empty, one 0, one negative), so 18,590 load and 3 are rejected | `sim/data/SIM04/` and `s3://t00-lake-<account-id>/sim/SIM04/`, laid out as `raw/trip-exports/`; not generated in this example |
-| SIM05 | `raw-30-days` | lake table | DS01 (the subset); zone ids of DS02 | table `trip_events_raw` after 30 days: the events of the 524,629 trips of zones 48, 161 and 230 requested from 2024-03-01 to 2024-03-30 (142,310, 188,010 and 194,309 trips, *measured* 2026-11-19, DuckDB over HTTPS), moved to the 30 days from 2026-10-24 to 2026-11-22: about 1.57 million events, 3 for each trip | one file a minute: 43,200 files in 30 days (ours); the request of a trip is in the folder of the day it was requested | none; the sizes are a first guess, and we set them so that the count is slow before compaction | `s3://t00-lake-<account-id>/sim/SIM05/`, laid out as `raw/trip-events/`; not generated in this example |
+| SIM05 | `raw-30-days` | lake table | DS01 (the subset); zone ids of DS02 | table `trip_events_raw` after 30 days: the events of the 524,629 trips of zones 48, 161 and 230 requested from 2024-03-01 to 2024-03-30 (142,310, 188,010 and 194,309 trips, *measured* 2026-11-19, DuckDB over HTTPS), moved to the 30 days from 2026-10-24 to 2026-11-22: about 1.57 million events, 3 for each trip | one file a minute: 43,200 files in 30 days (our choice); the request of a trip is in the folder of the day it was requested | none; the sizes are a first guess, and we set them so that the count is slow before compaction | `s3://t00-lake-<account-id>/sim/SIM05/`, laid out as `raw/trip-events/`; not generated in this example |
 
 The files of a stream data set (from Checkpoint 2; `uv run python -m sim.generate` writes them):
 
