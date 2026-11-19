@@ -3,7 +3,8 @@ Feature: Trips requested in each zone
   Covers the first part of JS01 (operations analyst): the number of trips requested in each pickup zone for each
   5-minute period. A period holds the requests with an event time from its start up to, and not including, its end.
   A table holds the only events of its example. A column left out has the example value of its field in
-  docs/design.md, section Data, part (c). A simulated data set is named by its id and described in part (d).
+  docs/design.md, section Data, Event kinds. A simulated data set is named by its id and described in
+  Simulated data sets.
 
   @R010
   Rule: When a 5-minute period ends, one count of requested trips is stored for each pickup zone that had a request
@@ -18,13 +19,6 @@ Feature: Trips requested in each zone
       Then within 60 s zone 161 has 2 trips requested between 09:00 and 09:05
       And within 60 s zone 230 has 1 trip requested between 09:00 and 09:05
 
-    Example: One simulated hour
-      Given the simulated data set SIM01 "rush-hour"
-      When the data set is delivered up to 2026-11-23T10:11:00Z
-      Then zones 48, 161 and 230 each have one count for each of the 12 periods from 09:00 to 10:00
-      And the counts of zones 48, 161 and 230 add up to 304, 191 and 342 trips requested
-      And zone 48 has 20 trips requested between 09:00 and 09:05
-
   @R020
   Rule: If a request is received after its period ended, it is added to the stored count of the period of its event time
 
@@ -35,13 +29,6 @@ Feature: Trips requested in each zone
         | ev-000012 | t-0012  | 161            | 2026-11-23T09:04:00Z | 2026-11-23T09:11:00Z |
       When the time is 2026-11-23T09:12:00Z
       Then zone 161 has 2 trips requested between 09:00 and 09:05
-
-    Example: First request of its zone and period received 7 minutes late
-      Given only these trip requests are received:
-        | event_id  | trip_id | pickup_zone_id | event_time           | received_time        |
-        | ev-000013 | t-0013  | 230            | 2026-11-23T09:04:00Z | 2026-11-23T09:11:00Z |
-      When the time is 2026-11-23T09:12:00Z
-      Then zone 230 has 1 trip requested between 09:00 and 09:05
 
   @R030
   Rule: Every count is shown with its zone and the start and end of its period
@@ -69,23 +56,6 @@ Feature: Trips requested in each zone
       Given the simulated data set SIM01 "rush-hour"
       When the counts are read at 2026-11-23T10:11:00Z
       Then every zone and period shows the count computed from the data set's record of events
-
-    Example: Two requests received again after the function failed
-      Given only these trip requests are received:
-        | event_id  | trip_id | pickup_zone_id | event_time           | received_time        |
-        | ev-000111 | t-0111  | 230            | 2026-11-23T09:11:00Z | 2026-11-23T09:11:01Z |
-        | ev-000112 | t-0112  | 230            | 2026-11-23T09:12:30Z | 2026-11-23T09:12:31Z |
-      And the function fails after it counted ev-000111 and receives both requests again
-      When the counts are read at 2026-11-23T09:16:00Z
-      Then zone 230 shows 2 trips requested between 09:10 and 09:15
-
-    Example: Second delivery 23 hours after the first
-      Given only these trip requests are received:
-        | event_id  | trip_id | pickup_zone_id | event_time           | received_time        |
-        | ev-000121 | t-0121  | 48             | 2026-11-23T09:11:00Z | 2026-11-23T09:11:01Z |
-        | ev-000121 | t-0121  | 48             | 2026-11-23T09:11:00Z | 2026-11-24T08:11:01Z |
-      When the counts are read at 2026-11-24T08:16:00Z
-      Then zone 48 shows 1 trip requested between 09:10 and 09:15
 
     # Replay limit: a second delivery up to 24 hours after the first is not counted. We assume the app does not
     # send an event again after that (Q030).

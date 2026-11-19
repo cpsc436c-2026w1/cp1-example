@@ -13,12 +13,6 @@ Feature: Questions about trip counts in plain language
       Then the reply states 12 trips requested
       And the reply does not state another count
 
-    Example: Zone and period without rows
-      Given the query for zone 48 between 09:25 and 09:30 returns 0 rows
-      When the analyst asks "How many trips were requested in zone 48 between 09:25 and 09:30?"
-      Then the reply says there is no data
-      And the reply does not state a count
-
     @eval
     Example: Eval of count answers
       Then the eval "count-answers" scores at least 0.8

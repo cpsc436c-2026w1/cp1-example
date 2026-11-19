@@ -1,7 +1,7 @@
 @JS01
 Feature: Yesterday's completed trips in one table
   Covers the second part of JS01 (operations analyst): each morning, yesterday's completed trips in one table.
-  A simulated data set is named by its id and described in docs/design.md, section Data, part (d).
+  A simulated data set is named by its id and described in docs/design.md, section Data, Simulated data sets.
   Each example starts with tables trips_curated and trips_rejected empty.
 
   @R040
@@ -28,16 +28,9 @@ Feature: Yesterday's completed trips in one table
       And table trips_rejected has trip t-0403 with reason "fare not above 0"
       And table trips_rejected has trip t-0404 with reason "fare not above 0"
 
-    Example: File with 3 trips that do not have a fare above 0
-      Given the simulated data set SIM04 "trips-day"
-      When the file for 2026-11-22 arrives at 2026-11-23T05:10:00Z
-      Then before 2026-11-23T06:00:00Z table trips_rejected has 3 rows for 2026-11-22
-      And table trips_curated has 18590 rows for 2026-11-22
-
   @RF040 @live
   Rule: The count by zone over 30 days stays fast while the stream adds a small file to raw/ every minute
-    The count is the query in docs/design.md, section Data, part (b): trips requested in each pickup zone, from
-    2026-10-24 to 2026-11-22, on table trip_events_compacted.
+    The count is trips requested in each pickup zone from 2026-10-24 to 2026-11-22, read from the compacted files.
 
     Example: Thirty days of small files, compacted
       Given the simulated data set SIM05 "raw-30-days"

@@ -17,12 +17,12 @@ generator for three of the five data sets, and code for three of the thirteen ru
 |---|---|---|
 | `docs/proposal.md` | the proposal as tagged; sections 4 and 5 now point to the design | done |
 | `docs/requirements.md` | job stories JS01 to JS03 as headings; under each, requirement lines R010 … in EARS form; the Feedback 1 codes RF010 … and RQ010 in a table; one eval row; assumptions | Monday |
-| `docs/design.md` | a text sketch, workflows, resources with the script that will create each, what is outside the system, and the section Data in five parts: (a) sources DS01 …, (b) where data lives in the bucket and the tables, (c) the fields of each event with their valid values, (d) simulated data sets SIM01 …, (e) which requirement and scenario uses which data set | Monday |
+| `docs/design.md` | a sketch, workflows, resources with the script that will create each, what is outside the system, and the section Data in three parts: Sources (DS01 … and the bucket as a tree), Event kinds (the fields of each event with their valid values), Simulated data sets (SIM01 …, their injected faults and the codes that use them) | Monday |
 | `features/*.feature` | one feature for what a user gets, tagged with its stories; one `Rule:` for each code, tagged with the code; examples with small tables or a data set named by id | Monday |
 | `features/steps/.gitkeep`, `behave.ini` | an empty folder, so that the dry run works; two display settings | Monday |
 | `tools/check_trace.py` | checks that every code and every data id is defined once and used where it must be | provided |
 | `sim/seed/ds01_sample.csv`, `tools/extract_seed.sql` | 837 rows of DS01 that the data sets are built from, and the query that wrote them | Checkpoint 2 |
-| `sim/datasets.py`, `sim/generate.py` | the data sets of part (d) as settings, and the generator that writes them to `sim/data/<id>/` | Checkpoint 2 |
+| `sim/datasets.py`, `sim/generate.py` | the simulated data sets of the design as settings, and the generator that writes them to `sim/data/<id>/` | Checkpoint 2 |
 | `src/rides/counting.py`, `src/rides/assign.py` | local code for two things: the count of requests by zone and period, and the accept with a condition | Checkpoint 2 |
 | `features/environment.py`, `features/steps/*.py` | what makes the examples of RF010, RF020 and RF030 run | Checkpoint 2 |
 | `tests/` | pytest: the checker with one planted error for each rule, the generator's seed, the local code | Checkpoint 2 |

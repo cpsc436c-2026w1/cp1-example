@@ -8,14 +8,14 @@ table code -> where defined -> where used. Exit code 1 if there is a problem, el
 
 The rules:
   1. Every JS, R, RF and RQ code is defined once in docs/requirements.md.
-  2. Every R line of a focus story, and every RF whose Check cell starts with "examples tagged", is the tag of a
-     Rule in features/. (An RF whose Check cell starts with "read:" and an RQ do not get a rule.)
+  2. Every R line of a focus story, and every RF whose Check cell starts with "BDD:", is the tag of a Rule in
+     features/. (An RF whose Check cell starts with "read:" and an RQ do not get a rule.)
   3. Every code used as a tag in features/ or named in docs/design.md is defined in docs/requirements.md.
   4. A code is the tag of one Rule only.
   5. Every DS and SIM id is defined once in docs/design.md, section Data: a DS as a row of the table under
      "Sources", a SIM as a row of the table under "Simulated data sets".
   6. Every DS or SIM id used in features/ or in docs/requirements.md is defined there.
-  7. Every SIM row names, in its From cell, a DS that is defined.
+  7. Every SIM row names a DS that is defined (in its Holds cell: "from DS01").
 """
 import re
 import sys
@@ -51,7 +51,7 @@ def read_requirements(path: Path, problems: list[str]) -> tuple[dict, set]:
                 needs_rule.add(m.group(1))
         elif m := re.match(r"\| (R[FQ]\d+) \|", line):              # | RF010 | wording | what we do | Check | ...
             define(m.group(1), n)
-            if m.group(1).startswith("RF") and cells(line)[3].startswith("examples tagged"):
+            if m.group(1).startswith("RF") and cells(line)[3].startswith("BDD:"):
                 needs_rule.add(m.group(1))
     return defined, needs_rule
 
@@ -78,7 +78,7 @@ def read_features(folder: Path, problems: list[str]) -> tuple[dict, dict, dict]:
 
 
 def read_design(path: Path, problems: list[str]) -> tuple[dict, dict, dict]:
-    """Returns ({DS or SIM id: place}, {SIM id: its From cell}, {code: [places in design.md]})."""
+    """Returns ({DS or SIM id: place}, {SIM id: the rest of its row}, {code: [places in design.md]})."""
     defined, sim_from, codes_used, in_data, part = {}, {}, {}, False, ""
     for n, line in enumerate(path.read_text().splitlines(), 1):
         place = f"design.md:{n}"
@@ -98,7 +98,7 @@ def read_design(path: Path, problems: list[str]) -> tuple[dict, dict, dict]:
                 problems.append(f"{place}: {row[0]} is defined twice (first at {defined[row[0]]})")
             defined.setdefault(row[0], place)
         if is_sim:
-            sim_from[row[0]] = row[3]                               # | Id | Name | Kind | From | ...
+            sim_from[row[0]] = " ".join(row[1:])                   # | Id | Name | Holds (from DS01) | ...
     return defined, sim_from, codes_used
 
 
@@ -132,12 +132,12 @@ def check(root: Path) -> tuple[list[str], list[tuple]]:
     for sim_id, source in sorted(sim_from.items()):                 # rule 7
         named = re.findall(r"DS\d+", source)
         if not named:
-            problems.append(f"{data_ids[sim_id]}: {sim_id} does not name a DS in its From cell")
+            problems.append(f"{data_ids[sim_id]}: {sim_id} does not name a DS in its row")
         for ds in named:
             if ds not in data_ids:
                 problems.append(f"{data_ids[sim_id]}: {sim_id} is built from {ds}, which is not defined under Sources")
             else:
-                data_used.setdefault(ds, []).append(f"{sim_id} (From)")
+                data_used.setdefault(ds, []).append(sim_id)
 
     table = []
     for code, place in codes.items():
