@@ -12,10 +12,10 @@ The rules:
      features/. (An RF whose Check cell starts with "read:" and an RQ do not get a rule.)
   3. Every code used as a tag in features/ or named in docs/design.md is defined in docs/requirements.md.
   4. A code is the tag of one Rule only.
-  5. Every DS and SIM id is defined once in docs/design.md, section Data: a DS as a row of the table under
-     "Sources", a SIM as a row of the table under "Simulated data sets".
+  5. Every DS and SIM id is defined once in docs/design.md, section Data: a DS where "Our data" first names it,
+     a SIM as a bullet under "Simulated data" that starts with its id (- **SIM01 Rush hour.** ...).
   6. Every DS or SIM id used in features/ or in docs/requirements.md is defined there.
-  7. Every SIM row names a DS that is defined (in its Holds cell: "from DS01").
+  7. Every SIM bullet names a DS that is defined ("from DS01").
 """
 import re
 import sys
@@ -78,8 +78,8 @@ def read_features(folder: Path, problems: list[str]) -> tuple[dict, dict, dict]:
 
 
 def read_design(path: Path, problems: list[str]) -> tuple[dict, dict, dict]:
-    """Returns ({DS or SIM id: place}, {SIM id: the rest of its row}, {code: [places in design.md]})."""
-    defined, sim_from, codes_used, in_data, part = {}, {}, {}, False, ""
+    """Returns ({DS or SIM id: place}, {SIM id: the rest of its bullet}, {code: [places in design.md]})."""
+    defined, sim_from, codes_used, in_data, part, last = {}, {}, {}, False, "", ""
     for n, line in enumerate(path.read_text().splitlines(), 1):
         place = f"design.md:{n}"
         if line.startswith("## "):
@@ -88,17 +88,19 @@ def read_design(path: Path, problems: list[str]) -> tuple[dict, dict, dict]:
             part = line
         for code in re.findall(CODE, line):
             codes_used.setdefault(code, []).append(place)
-        if not (in_data and line.startswith("|")):
+        if not in_data:
             continue
-        row = cells(line)
-        is_source = "Sources" in part and re.fullmatch(r"DS\d+", row[0])
-        is_sim = "Simulated data sets" in part and re.fullmatch(r"SIM\d+", row[0])
-        if is_source or is_sim:
-            if row[0] in defined:
-                problems.append(f"{place}: {row[0]} is defined twice (first at {defined[row[0]]})")
-            defined.setdefault(row[0], place)
-        if is_sim:
-            sim_from[row[0]] = " ".join(row[1:])                   # | Id | Name | Holds (from DS01) | ...
+        if "Our data" in part:                                      # a DS is defined where the text first names it
+            for ds in re.findall(r"\bDS\d+\b", line):
+                defined.setdefault(ds, place)
+        elif "Simulated data" in part and (m := re.match(r"- \*\*(SIM\d+)\b", line)):
+            sim, last = m.group(1), m.group(1)                      # - **SIM01 Rush hour.** ... from DS01 ...
+            if sim in defined:
+                problems.append(f"{place}: {sim} is defined twice (first at {defined[sim]})")
+            defined.setdefault(sim, place)
+            sim_from[sim] = line[m.end():]
+        elif "Simulated data" in part and line.startswith("  ") and sim_from:
+            sim_from[last] += " " + line                            # the bullet's next lines
     return defined, sim_from, codes_used
 
 
@@ -132,10 +134,10 @@ def check(root: Path) -> tuple[list[str], list[tuple]]:
     for sim_id, source in sorted(sim_from.items()):                 # rule 7
         named = re.findall(r"DS\d+", source)
         if not named:
-            problems.append(f"{data_ids[sim_id]}: {sim_id} does not name a DS in its row")
+            problems.append(f"{data_ids[sim_id]}: {sim_id} does not name a DS in its bullet")
         for ds in named:
             if ds not in data_ids:
-                problems.append(f"{data_ids[sim_id]}: {sim_id} is built from {ds}, which is not defined under Sources")
+                problems.append(f"{data_ids[sim_id]}: {sim_id} is built from {ds}, which is not defined under Our data")
             else:
                 data_used.setdefault(ds, []).append(sim_id)
 

@@ -13,13 +13,13 @@ Before the studio: `uv` installed; `uv sync` once in this folder.
 | 1 | `README.md`, the table | the upper rows are Monday's hand-in, the lower rows are Checkpoint 2 |
 | 2 | `docs/requirements.md`, JS01 | a story is a heading; under it lines R010 … in five forms: WHEN (R010), IF … THEN (R020), no keyword (R030), WHERE with WHEN (R060), WHILE (R090 under JS03). A code is used once in the file; a number after `|` is the requirement's target |
 | 3 | `docs/requirements.md`, Constraints and requests | the Feedback 1 codes with their wording; `Check` starts with `BDD:` and links the feature file (RF010 to RF040) or `read:` (RF050); RQ010 has a short note that says what the team will show at Checkpoint 2; the eval row for R060 |
-| 4 | `docs/design.md`, Data, Sources | the real data: DS01 and DS02 with a link, rows and size; the bucket as a tree, one line a folder. Names only: nothing is created. Run the count below |
-| 5 | `docs/design.md`, Data, Event kinds | a field table for each kind of event, with the valid values of each field; the fields are the columns of an example's table |
-| 6 | `docs/design.md`, Data, Simulated data sets | SIM01 to SIM05: what each holds, its injected faults with exact counts, the codes that use it |
+| 4 | `docs/design.md`, Data, Our data | four sentences: DS01 and DS02, the subset with its rows and size, and what the events are built from. Run the count below |
+| 5 | `docs/design.md`, Data, Simulated data for the demos | SIM01 to SIM05, one bullet each in words: what it holds, its injected faults with exact counts, the code it shows |
+| 6 | `docs/design.md`, Data, Event fields the scenarios use | one line for each kind of event; the fields are the columns of an example's table. Field types and valid values come at Checkpoint 2 |
 | 7 | `features/js01_trips_per_zone.feature`, rule `@RF010` | story tag on the feature, code tag on the rule; one example with a 3-row table, one with `Given the simulated data set SIM01 "rush-hour"`. Then `trip_assignment.feature`: two story tags, a rule with two code tags (`@R080 @RF030`). Then the `@eval` gate in `js01_count_questions.feature` |
 | 8 | the two checks below | the traceability table, then the dry run on the Monday state |
 
-Step 4, one number of the Sources table checked (reads the file's footer over HTTPS):
+Step 4, one number of Our data checked (reads the file's footer over HTTPS):
 
 ```
 $ echo "SELECT count(*) AS trips FROM 'https://d37ci6vzurychx.cloudfront.net/trip-data/fhvhv_tripdata_2024-03.parquet';" | uvx --from duckdb-cli duckdb
@@ -38,7 +38,7 @@ R010   requirements.md:11     js01_trips_per_zone.feature:10, design.md (4 lines
 R020   requirements.md:12     js01_trips_per_zone.feature:23, design.md (3 lines)
 R030   requirements.md:13     js01_trips_per_zone.feature:34, design.md (4 lines)
 R040   requirements.md:14     js01_yesterdays_trips.feature:8, design.md (5 lines)
-R050   requirements.md:15     js01_yesterdays_trips.feature:16, design.md (5 lines)
+R050   requirements.md:15     js01_yesterdays_trips.feature:16, design.md (4 lines)
 R060   requirements.md:16     js01_count_questions.feature:6, design.md (3 lines)
 JS02   requirements.md:18     trip_assignment.feature:2
 R070   requirements.md:23     trip_assignment.feature:9, design.md (5 lines)
@@ -52,13 +52,13 @@ RF030  requirements.md:41     trip_assignment.feature:17, design.md (4 lines)
 RF040  requirements.md:42     js01_yesterdays_trips.feature:32, design.md (6 lines)
 RF050  requirements.md:43     design.md (1 lines)
 RQ010  requirements.md:44     read, not run
-DS01   design.md:95           requirements.md:7, SIM01, SIM02, SIM03, SIM04, SIM05
-DS02   design.md:96           SIM01
-SIM01  design.md:160          js01_trips_per_zone.feature:56
-SIM02  design.md:161          js01_trips_per_zone.feature:79
-SIM03  design.md:162          trip_assignment.feature:29
-SIM04  design.md:163          js01_yesterdays_trips.feature:11
-SIM05  design.md:164          js01_yesterdays_trips.feature:36
+DS01   design.md:90           requirements.md:7, SIM01, SIM02, SIM03, SIM04, SIM05
+DS02   design.md:94           not used
+SIM01  design.md:100          js01_trips_per_zone.feature:56
+SIM02  design.md:102          js01_trips_per_zone.feature:79
+SIM03  design.md:104          trip_assignment.feature:29
+SIM04  design.md:106          js01_yesterdays_trips.feature:11
+SIM05  design.md:108          js01_yesterdays_trips.feature:36
 
 26 codes and data ids, 0 problems
 $ echo $?
@@ -93,7 +93,7 @@ of scenarios (17) equals the number of `Example:` lines.
 
 | # | Show | Say |
 |---|---|---|
-| 9 | `sim/datasets.py` beside Data, Simulated data sets; run the generator | the table became settings; the id is the folder name; the folders are those of `raw/trip-events/` |
+| 9 | `sim/datasets.py` beside Data, Simulated data for the demos; run the generator | the bullets became settings; the id is the folder name; the folders are those of `raw/trip-events/` |
 | 10 | run `@RF010`; ask for a prediction; run it with `DEDUPE=off` | the example knew its answer before the system ran; with the check off the count is 3, not 2, and the simulated hour with its 4 duplicates fails too |
 | 11 | run `@RF020` and `@RF030` | a zone without events is `no data`; two accepts, each sent before the other has an answer: the conditional write gives the trip to one driver and refuses the other |
 | 12 | `uv run pytest -q` | the generator's seed, the local code (with the two accepts without the condition: both drivers are told assigned), the checker with a planted error for each rule |
@@ -122,9 +122,9 @@ USING RUNNER: behave.runner:Runner
 Feature: Trips requested in each zone # features/js01_trips_per_zone.feature:2
   Covers the first part of JS01 (operations analyst): the number of trips requested in each pickup zone for each
   5-minute period. A period holds the requests with an event time from its start up to, and not including, its end.
-  A table holds the only events of its example. A column left out has the example value of its field in
-  docs/design.md, section Data, Event kinds. A simulated data set is named by its id and described in
-  Simulated data sets.
+  A table holds the only events of its example. Its columns are event fields listed in docs/design.md,
+  section Data. A simulated data set is named by its id and described in the same section, under Simulated data
+  for the demos.
     Example: One request delivered twice                            # features/js01_trips_per_zone.feature:46
       Given only these trip requests are received:                  # features/steps/data_steps.py:7
         | event_id  | trip_id | pickup_zone_id | event_time           | received_time        |
@@ -196,7 +196,7 @@ Step 12:
 ```
 $ uv run pytest -q
 ...............................                                          [100%]
-31 passed in 1.92s
+31 passed in 1.95s
 ```
 
 ## What stays a draft

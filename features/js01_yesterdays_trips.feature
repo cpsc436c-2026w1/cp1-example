@@ -1,7 +1,7 @@
 @JS01
 Feature: Yesterday's completed trips in one table
   Covers the second part of JS01 (operations analyst): each morning, yesterday's completed trips in one table.
-  A simulated data set is named by its id and described in docs/design.md, section Data, Simulated data sets.
+  A simulated data set is named by its id and described in docs/design.md, section Data.
   Each example starts with tables trips_curated and trips_rejected empty.
 
   @R040

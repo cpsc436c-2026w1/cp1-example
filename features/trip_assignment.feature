@@ -3,7 +3,7 @@ Feature: One driver for each trip
   Covers JS02 (driver): whether the trip I accepted is mine.
   Covers JS03 (rider): which driver is coming.
   A table holds the only accepts of its example. An accept is one request to our API. A simulated data set is named by its id and described in
-  docs/design.md, section Data, Simulated data sets.
+  docs/design.md, section Data.
 
   @R070
   Rule: When a driver accepts a trip that is requested and not assigned, the trip is assigned to that driver

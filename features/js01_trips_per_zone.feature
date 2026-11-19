@@ -2,9 +2,9 @@
 Feature: Trips requested in each zone
   Covers the first part of JS01 (operations analyst): the number of trips requested in each pickup zone for each
   5-minute period. A period holds the requests with an event time from its start up to, and not including, its end.
-  A table holds the only events of its example. A column left out has the example value of its field in
-  docs/design.md, section Data, Event kinds. A simulated data set is named by its id and described in
-  Simulated data sets.
+  A table holds the only events of its example. Its columns are event fields listed in docs/design.md,
+  section Data. A simulated data set is named by its id and described in the same section, under Simulated data
+  for the demos.
 
   @R010
   Rule: When a 5-minute period ends, one count of requested trips is stored for each pickup zone that had a request
