@@ -51,8 +51,8 @@ From our Feedback 1 issue, with its codes and wording.
 
 ## Assumptions
 
-| Id | What the case does not say | We assume | Affects |
-|---|---|---|---|
-| Q010 | Does a trip that the rider cancels still count as requested? | yes, the count is of requests | R010, RF010 |
-| Q020 | Which driver gets the trip when two accept at the same moment? | the one whose write reaches the table first | R080, RF030 |
-| Q030 | Can the app send an event again more than 24 hours after it first sent it? | no: the app's retries end within minutes | RF010 |
+| Id | What the case does not say | Who would answer | We assume | Affects |
+|---|---|---|---|---|
+| Q010 | Does a trip that the rider cancels still count as requested? | the operations analyst | yes, the count is of requests | R010, RF010 |
+| Q020 | Which driver gets the trip when two accept at the same moment? | the product owner | the one whose write reaches the table first | R080, RF030 |
+| Q030 | Can the app send an event again more than 24 hours after it first sent it? | the app's team | no: the app's retries end within minutes | RF010 |
