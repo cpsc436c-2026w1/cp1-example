@@ -141,8 +141,8 @@ Feature: Trips requested in each zone # features/js01_trips_per_zone.feature:2
 
 1 feature passed, 0 failed, 3 skipped
 1 rule passed, 0 failed, 12 skipped
-2 scenarios passed, 0 failed, 15 skipped
-6 steps passed, 0 failed, 60 skipped
+2 scenarios passed, 0 failed, 17 skipped
+6 steps passed, 0 failed, 66 skipped
 Took 0min 0.000s
 ```
 
@@ -169,8 +169,8 @@ Failing scenarios:
 
 0 features passed, 1 failed, 3 skipped
 0 rules passed, 1 failed, 12 skipped
-0 scenarios passed, 2 failed, 15 skipped
-4 steps passed, 2 failed, 60 skipped
+0 scenarios passed, 2 failed, 17 skipped
+4 steps passed, 2 failed, 66 skipped
 Took 0min 0.000s
 ```
 
@@ -180,14 +180,14 @@ Step 11 (last lines of each):
 $ uv run behave --tags=@RF020
 1 feature passed, 0 failed, 3 skipped
 1 rule passed, 0 failed, 12 skipped
-2 scenarios passed, 0 failed, 15 skipped
-10 steps passed, 0 failed, 56 skipped
+2 scenarios passed, 0 failed, 17 skipped
+10 steps passed, 0 failed, 62 skipped
 Took 0min 0.000s
 $ uv run behave --tags=@RF030
 1 feature passed, 0 failed, 3 skipped
 1 rule passed, 0 failed, 12 skipped
-2 scenarios passed, 0 failed, 15 skipped
-8 steps passed, 0 failed, 58 skipped
+2 scenarios passed, 0 failed, 17 skipped
+8 steps passed, 0 failed, 64 skipped
 Took 0min 0.000s
 ```
 
