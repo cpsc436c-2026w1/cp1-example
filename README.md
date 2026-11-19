@@ -25,7 +25,7 @@ generator for three of the five data sets, and code for three of the thirteen ru
 | `sim/datasets.py`, `sim/generate.py` | the simulated data sets of the design as settings, and the generator that writes them to `sim/data/<id>/` | Checkpoint 2 |
 | `src/rides/counting.py`, `src/rides/assign.py` | local code for two things: the count of requests by zone and period, and the accept with a condition | Checkpoint 2 |
 | `features/environment.py`, `features/steps/*.py` | what makes the examples of RF010, RF020 and RF030 run | Checkpoint 2 |
-| `tests/` | pytest: the checker with one planted error for each rule, the generator's seed, the local code | Checkpoint 2 |
+| `tests/` | pytest: the checker, with one injected error for each check, the generator's seed, the local code | Checkpoint 2 |
 | `DEMO.md` | the order to show all of this in the studio, with commands and their output | |
 
 ## Commands
