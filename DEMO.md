@@ -76,8 +76,8 @@ $ git checkout -q monday
 $ uvx behave@1.3.3 --dry-run --no-snippets        # last lines
 0 features passed, 0 failed, 4 error, 0 skipped
 0 rules passed, 0 failed, 13 error, 0 skipped
-0 scenarios passed, 0 failed, 17 error, 0 skipped
-0 steps passed, 0 failed, 0 skipped, 66 undefined
+0 scenarios passed, 0 failed, 19 error, 0 skipped
+0 steps passed, 0 failed, 0 skipped, 72 undefined
 $ grep -c "^ *Example:" features/*.feature        # 17 in all
 features/js01_yesterdays_trips.feature:3
 features/js01_count_questions.feature:2
