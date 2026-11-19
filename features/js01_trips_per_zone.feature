@@ -22,6 +22,13 @@ Feature: Trips requested in each zone
   @R020
   Rule: If a request is received after its period ended, it is added to the stored count of the period of its event time
 
+    Example: One late request in a zone without a count
+      Given only these trip requests are received:
+        | event_id  | trip_id | pickup_zone_id | event_time           | received_time        |
+        | ev-000013 | t-0013  | 48             | 2026-11-23T09:02:00Z | 2026-11-23T09:07:00Z |
+      When the time is 2026-11-23T09:08:00Z
+      Then zone 48 has 1 trip requested between 09:00 and 09:05
+
     Example: Request received 7 minutes late
       Given only these trip requests are received:
         | event_id  | trip_id | pickup_zone_id | event_time           | received_time        |
@@ -29,6 +36,13 @@ Feature: Trips requested in each zone
         | ev-000012 | t-0012  | 161            | 2026-11-23T09:04:00Z | 2026-11-23T09:11:00Z |
       When the time is 2026-11-23T09:12:00Z
       Then zone 161 has 2 trips requested between 09:00 and 09:05
+
+    Example: Late request at the boundary goes to the period it starts
+      Given only these trip requests are received:
+        | event_id  | trip_id | pickup_zone_id | event_time           | received_time        |
+        | ev-000014 | t-0014  | 161            | 2026-11-23T09:05:00Z | 2026-11-23T09:11:30Z |
+      When the time is 2026-11-23T09:12:30Z
+      Then zone 161 has 1 trip requested between 09:05 and 09:10
 
   @R030
   Rule: Every count is shown with its zone and the start and end of its period
