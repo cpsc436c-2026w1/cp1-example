@@ -42,7 +42,7 @@ PLANTED = [
     ("rule 2: an R line with a Scenario link without a Rule", COUNTS, "  @R030\n", "", "R030 is not the tag of a Rule"),
     ("rule 2: an RF with a Scenario link without a Rule", COUNTS, "  @RF020\n", "", "RF020 is not the tag of a Rule"),
     ("rule 2: a Scenario link to a file without the Rule", REQ,
-     "(R080). [Scenario](../features/trip_assignment.feature)", "(R080). [Scenario](../features/js01_trips_per_zone.feature)",
+     "not assigned yet. [Scenario](../features/trip_assignment.feature)", "not assigned yet. [Scenario](../features/js01_trips_per_zone.feature)",
      "RF030 links js01_trips_per_zone.feature, but its Rule is at trip_assignment.feature"),
     ("rule 3: a tag that is not a defined code", COUNTS, "  @R020\n", "  @R020 @R999\n", "@R999 is not defined"),
     ("rule 3: a story tag that is not a defined story", ASSIGN, "@JS02 @JS03", "@JS02 @JS09", "@JS09 is not defined"),
