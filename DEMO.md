@@ -11,8 +11,8 @@ Before the studio: `uv` installed; `uv sync` once in this folder.
 | # | Show | Say |
 |---|---|---|
 | 1 | `README.md`, the table | the upper rows are Monday's hand-in, the lower rows are Checkpoint 2 |
-| 2 | `docs/requirements.md`, JS01 | a story is a heading; under it lines R010 … in five forms: WHEN (R010), IF … THEN (R020), no keyword (R030), WHERE with WHEN (R060), WHILE (R090 under JS03). A code is used once in the file; a number after `|` is the requirement's target |
-| 3 | `docs/requirements.md`, Constraints and requests | the Feedback 1 codes with their wording; `Check` starts with `BDD:` and links the feature file (RF010 to RF040) or `read:` (RF050); RQ010 has a short note that says what the team will show at Checkpoint 2; the eval row for R060 |
+| 2 | `docs/requirements.md`, JS01 | a story is a heading; under it lines R010 … in five forms: WHEN (R010), IF … THEN (R020), no keyword (R030), WHERE with WHEN (R060), WHILE (R090 under JS03). A code is used once in the file; a number after `|` is the requirement's target; `[Scenario]` at the end of a line links the feature file that has its rule |
+| 3 | `docs/requirements.md`, Stakeholder input | the feedback codes with their wording, then `We:` and what the team does; the line ends with `[Scenario]` and the feature file (RF010 to RF040) or with `Read:` and what staff will read (RF050); RQ010 has a note for Checkpoint 1 that says what the team will show at Checkpoint 2; the eval row for R060 |
 | 4 | `docs/design.md`, Data, Our data | four sentences: DS01 and DS02, the subset with its rows and size, and what the events are built from. Run the count below |
 | 5 | `docs/design.md`, Data, Simulated data for the demos | SIM01 to SIM05, one bullet each in words: what it holds, its injected faults with exact counts, the code it shows |
 | 6 | `docs/design.md`, Data, Event fields the scenarios use | one line for each kind of event; the fields are the columns of an example's table. Field types and valid values come at Checkpoint 2 |
@@ -36,7 +36,7 @@ Code   Defined                Used
 JS01   requirements.md:5      js01_count_questions.feature:2, js01_trips_per_zone.feature:2, js01_yesterdays_trips.feature:2
 R010   requirements.md:11     js01_trips_per_zone.feature:10, design.md (4 lines)
 R020   requirements.md:12     js01_trips_per_zone.feature:23, design.md (3 lines)
-R030   requirements.md:13     js01_trips_per_zone.feature:34, design.md (4 lines)
+R030   requirements.md:13     js01_trips_per_zone.feature:48, design.md (4 lines)
 R040   requirements.md:14     js01_yesterdays_trips.feature:8, design.md (5 lines)
 R050   requirements.md:15     js01_yesterdays_trips.feature:16, design.md (4 lines)
 R060   requirements.md:16     js01_count_questions.feature:6, design.md (3 lines)
@@ -46,16 +46,16 @@ R080   requirements.md:24     trip_assignment.feature:17, design.md (5 lines)
 JS03   requirements.md:26     trip_assignment.feature:2
 R090   requirements.md:30     trip_assignment.feature:37, design.md (6 lines)
 R100   requirements.md:31     trip_assignment.feature:46, design.md (6 lines)
-RF010  requirements.md:39     js01_trips_per_zone.feature:44, design.md (5 lines)
-RF020  requirements.md:40     js01_trips_per_zone.feature:65, design.md (6 lines)
-RF030  requirements.md:41     trip_assignment.feature:17, design.md (4 lines)
-RF040  requirements.md:42     js01_yesterdays_trips.feature:32, design.md (6 lines)
-RF050  requirements.md:43     design.md (1 lines)
-RQ010  requirements.md:44     read, not run
+RF010  requirements.md:37     js01_trips_per_zone.feature:58, design.md (5 lines)
+RF020  requirements.md:38     js01_trips_per_zone.feature:79, design.md (6 lines)
+RF030  requirements.md:39     trip_assignment.feature:17, design.md (4 lines)
+RF040  requirements.md:40     js01_yesterdays_trips.feature:32, design.md (6 lines)
+RF050  requirements.md:41     design.md (1 lines)
+RQ010  requirements.md:42     read, not run
 DS01   design.md:90           requirements.md:7, SIM01, SIM02, SIM03, SIM04, SIM05
 DS02   design.md:94           not used
-SIM01  design.md:100          js01_trips_per_zone.feature:56
-SIM02  design.md:102          js01_trips_per_zone.feature:79
+SIM01  design.md:100          js01_trips_per_zone.feature:70
+SIM02  design.md:102          js01_trips_per_zone.feature:93
 SIM03  design.md:104          trip_assignment.feature:29
 SIM04  design.md:106          js01_yesterdays_trips.feature:11
 SIM05  design.md:108          js01_yesterdays_trips.feature:36
@@ -67,7 +67,7 @@ $ echo $?
 
 RF050 and RQ010 are read, not run, so they do not have a rule. To see a problem, change
 `SIM02` to `SIM09` in the feature file and run it again:
-`PROBLEM js01_trips_per_zone.feature:79: SIM09 is not defined in docs/design.md, section Data`, exit code 1.
+`PROBLEM js01_trips_per_zone.feature:93: SIM09 is not defined in docs/design.md, section Data`, exit code 1.
 
 Step 8, the dry run on what a team hands in (tag `cp1`: no step code, `features/steps/.gitkeep` only):
 

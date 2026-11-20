@@ -39,8 +39,11 @@ def test_example_is_clean():
 
 PLANTED = [
     ("rule 1: a code defined twice", REQ, "- **R020** IF", "- **R010** IF", "R010 is defined twice"),
-    ("rule 2: an R line of a focus story without a Rule", COUNTS, "  @R030\n", "", "R030 is not the tag of a Rule"),
-    ("rule 2: an RF checked by examples without a Rule", COUNTS, "  @RF020\n", "", "RF020 is not the tag of a Rule"),
+    ("rule 2: an R line with a Scenario link without a Rule", COUNTS, "  @R030\n", "", "R030 is not the tag of a Rule"),
+    ("rule 2: an RF with a Scenario link without a Rule", COUNTS, "  @RF020\n", "", "RF020 is not the tag of a Rule"),
+    ("rule 2: a Scenario link to a file without the Rule", REQ,
+     "(R080). [Scenario](../features/trip_assignment.feature)", "(R080). [Scenario](../features/js01_trips_per_zone.feature)",
+     "RF030 links js01_trips_per_zone.feature, but its Rule is at trip_assignment.feature"),
     ("rule 3: a tag that is not a defined code", COUNTS, "  @R020\n", "  @R020 @R999\n", "@R999 is not defined"),
     ("rule 3: a story tag that is not a defined story", ASSIGN, "@JS02 @JS03", "@JS02 @JS09", "@JS09 is not defined"),
     ("rule 3: a code in the design that is not defined", DESIGN, "| R070, R080, RF030 |", "| R070, R085, RF030 |",
@@ -69,9 +72,10 @@ def test_planted_error_is_found(copy, name, file, old, new, message):
 
 
 def test_exemptions_are_not_problems(copy):
-    """RF050 (read:) and RQ010 do not have a Rule, and R100 (story not in focus) may lose its Rule: not problems."""
+    """RF050 (Read:) and RQ010 do not have a Rule, and R100 without a Scenario link may lose its Rule: not problems."""
+    change(copy, REQ, "(SLO) [Scenario](../features/trip_assignment.feature)\n\n## Stakeholder", "(SLO)\n\n## Stakeholder")
     change(copy, ASSIGN, "  @R100\n", "")
     result = run(copy)
-    assert result.returncode == 0
+    assert result.returncode == 0, result.stdout
     for code in ("R100", "RF050", "RQ010"):
         assert not any(code in line for line in result.stdout.splitlines() if line.startswith("PROBLEM"))

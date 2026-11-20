@@ -7,9 +7,10 @@ It reads docs/requirements.md, docs/design.md and features/*.feature, prints one
 table code -> where defined -> where used. Exit code 1 if there is a problem, else 0. Standard library only.
 
 The rules:
-  1. Every JS, R, RF and RQ code is defined once in docs/requirements.md.
-  2. Every R line of a focus story, and every RF whose Check cell starts with "BDD:", is the tag of a Rule in
-     features/. (An RF whose Check cell starts with "read:" and an RQ do not get a rule.)
+  1. Every JS, R, RF and RQ code is defined once in docs/requirements.md: a JS where its heading starts with it
+     (## JS01 ...), an R, RF or RQ where a list item starts with it (- **R010** ..., - **RF010** ...).
+  2. Every R or RF line that ends with a Scenario link (`[Scenario](../features/<file>.feature)`) is the tag of a
+     Rule in that feature file. (An RF with "Read: ..." and an RQ do not get a rule.)
   3. Every code used as a tag in features/ or named in docs/design.md is defined in docs/requirements.md.
   4. A code is the tag of one Rule only.
   5. Every DS and SIM id is defined once in docs/design.md, section Data: a DS where "Our data" first names it,
@@ -25,14 +26,9 @@ CODE = r"\b(?:JS|RF|RQ|R)\d+\b"       # JS01, R010, RF010, RQ010
 DATA_ID = r"\b(?:DS|SIM)\d+\b"        # DS01, SIM01
 
 
-def cells(row: str) -> list[str]:
-    """The cells of one Markdown table row."""
-    return [c.strip() for c in row.strip().strip("|").split("|")]
-
-
-def read_requirements(path: Path, problems: list[str]) -> tuple[dict, set]:
-    """Returns ({code: "requirements.md:12"}, the codes that must have a Rule)."""
-    defined, needs_rule, focus = {}, set(), False
+def read_requirements(path: Path, problems: list[str]) -> tuple[dict, dict]:
+    """Returns ({code: "requirements.md:12"}, {code that must have a Rule: the feature file its Scenario link names})."""
+    defined, needs_rule = {}, {}
 
     def define(code, n):
         if code in defined:
@@ -40,19 +36,14 @@ def read_requirements(path: Path, problems: list[str]) -> tuple[dict, set]:
         defined.setdefault(code, f"requirements.md:{n}")
 
     for n, line in enumerate(path.read_text().splitlines(), 1):
-        if m := re.match(r"## (JS\d+)\b", line):                    # ## JS01 Driver: ... (focus)
+        if m := re.match(r"## (JS\d+)\b", line):                    # ## JS01 Driver: ...
             define(m.group(1), n)
-            focus = "(focus)" in line
-        elif line.startswith("## "):
-            focus = False
-        elif m := re.match(r"- \*\*(R\d+)\*\*", line):              # - **R010** WHEN ...
-            define(m.group(1), n)
-            if focus:
-                needs_rule.add(m.group(1))
-        elif m := re.match(r"\| (R[FQ]\d+) \|", line):              # | RF010 | wording | what we do | Check | ...
-            define(m.group(1), n)
-            if m.group(1).startswith("RF") and cells(line)[3].startswith("BDD:"):
-                needs_rule.add(m.group(1))
+        elif m := re.match(r"- \*\*(R[FQ]?\d+)\b", line):          # - **R010** WHEN ...   - **RF010** wording ...
+            code = m.group(1)
+            define(code, n)
+            link = re.search(r"\[Scenario\]\((?:\.\./)?features/([^)]+\.feature)\)", line)
+            if link and not code.startswith("RQ"):
+                needs_rule[code] = link.group(1)
     return defined, needs_rule
 
 
@@ -111,9 +102,11 @@ def check(root: Path) -> tuple[list[str], list[tuple]]:
     tags, rules, data_in_features = read_features(root / "features", problems)
     data_ids, sim_from, codes_in_design = read_design(root / "docs/design.md", problems)
 
-    for code in sorted(needs_rule):                                 # rule 2
+    for code, file in sorted(needs_rule.items()):                   # rule 2
         if code not in rules:
             problems.append(f"{codes[code]}: {code} is not the tag of a Rule in features/")
+        elif not any(place.startswith(file + ":") for place in rules[code]):
+            problems.append(f"{codes[code]}: {code} links {file}, but its Rule is at {rules[code][0]}")
     for code, places in sorted(tags.items()):                       # rule 3, tags
         if code not in codes:
             problems.append(f"{places[0]}: @{code} is not defined in docs/requirements.md")
