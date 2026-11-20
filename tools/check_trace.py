@@ -14,7 +14,7 @@ The rules:
   3. Every code used as a tag in features/ or named in docs/design.md is defined in docs/requirements.md.
   4. A code is the tag of one Rule only.
   5. Every DS and SIM id is defined once in docs/design.md, section Data: a DS where "Our data" first names it,
-     a SIM as a bullet under "Simulated data" that starts with its id (- **SIM01 Rush hour.** ...).
+     a SIM as a bullet under "Simulated data" that starts with its id (- **SIM01 Rush hour** [RF010] ...).
   6. Every DS or SIM id used in features/ or in docs/requirements.md is defined there.
   7. Every SIM bullet names a DS that is defined ("from DS01").
 """
@@ -85,7 +85,7 @@ def read_design(path: Path, problems: list[str]) -> tuple[dict, dict, dict]:
             for ds in re.findall(r"\bDS\d+\b", line):
                 defined.setdefault(ds, place)
         elif "Simulated data" in part and (m := re.match(r"- \*\*(SIM\d+)\b", line)):
-            sim, last = m.group(1), m.group(1)                      # - **SIM01 Rush hour.** ... from DS01 ...
+            sim, last = m.group(1), m.group(1)                      # - **SIM01 Rush hour** [RF010] ... from DS01 ...
             if sim in defined:
                 problems.append(f"{place}: {sim} is defined twice (first at {defined[sim]})")
             defined.setdefault(sim, place)

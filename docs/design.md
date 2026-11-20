@@ -100,16 +100,16 @@ gives the borough and name of each of its 265 zones. The system's events are sim
 
 ### Simulated data for the demos
 
-- **SIM01 Rush hour.** One morning hour in zones 48, 161 and 230, taken from the real trips (DS01): about 840 trips.
-  4 requests arrive twice and 2 arrive 6 to 10 minutes late. Shows RF010.
-- **SIM02 Quiet zone.** The same hour from DS01 without those faults, and zone 48 has no trips between 09:25 and
-  09:35. Shows RF020.
-- **SIM03 Double accept.** 20 trips of zone 161 from DS01, each accepted by two drivers at the same moment; for 10
-  of them the later accept is first in the file. Shows R080 and RF030.
-- **SIM04 Trips day.** One day's file of completed trips in the three zones from DS01: 18,593 rows, 3 of them
-  without a fare above 0. Shows R040.
-- **SIM05 Thirty days.** 30 days of events in the three zones from DS01, about 525,000 trips, as one small file a
-  minute. Shows RF040.
+- **SIM01 Rush hour** [RF010] One morning hour in zones 48, 161 and 230, taken from the real trips (DS01): about 840
+  trips. 4 requests arrive twice and 2 arrive 6 to 10 minutes late.
+- **SIM02 Quiet zone** [RF020] The same hour from DS01 without those faults, and zone 48 has no trips between 09:25
+  and 09:35.
+- **SIM03 Double accept** [R080, RF030] 20 trips of zone 161 from DS01, each accepted by two drivers at the same
+  moment; for 10 of them the later accept is first in the file.
+- **SIM04 Trips day** [R040] One day's file of completed trips in the three zones from DS01: 18,593 rows, 3 of them
+  without a fare above 0.
+- **SIM05 Thirty days** [RF040] 30 days of events in the three zones from DS01, about 525,000 trips, as one small
+  file a minute.
 
 **Event format** (each delivery also has `received_time`, set when the event arrives):
 
