@@ -7,8 +7,8 @@ which, where they live and how the simulated events are made from them.
 
 ## What is Checkpoint 1, and what is not
 
-**For Monday a team writes text only.** That is the upper part of the table. Tag `monday` of this repository is
-that state: `git checkout monday` shows it, `git checkout main` comes back.
+**For Monday a team writes text only.** That is the upper part of the table. Tag `cp1` of this repository is
+that state: `git checkout cp1` shows it, `git checkout main` comes back.
 
 **The lower part shows where Checkpoint 2 goes** and is here so that the studio can run one worked example: a
 generator for three of the five data sets, and code for three of the thirteen rules. The other rules stay drafts.

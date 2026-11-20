@@ -69,10 +69,10 @@ RF050 and RQ010 are read, not run, so they do not have a rule. To see a problem,
 `SIM02` to `SIM09` in the feature file and run it again:
 `PROBLEM js01_trips_per_zone.feature:79: SIM09 is not defined in docs/design.md, section Data`, exit code 1.
 
-Step 8, the dry run on what a team hands in (tag `monday`: no step code, `features/steps/.gitkeep` only):
+Step 8, the dry run on what a team hands in (tag `cp1`: no step code, `features/steps/.gitkeep` only):
 
 ```
-$ git checkout -q monday
+$ git checkout -q cp1
 $ uvx behave@1.3.3 --dry-run --no-snippets        # last lines
 0 features passed, 0 failed, 4 error, 0 skipped
 0 rules passed, 0 failed, 13 error, 0 skipped
