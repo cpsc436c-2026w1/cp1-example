@@ -2,7 +2,7 @@
 
 Team t00, the rides case: a ride-hailing app on New York taxi zones.
 
-## JS01 Operations analyst: trips requested in each zone (focus)
+## JS01 Operations analyst: trips requested in each zone
 
 When demand moves between zones during the morning rush (about 840 requests an hour in our three zones, from DS01), I want the
 number of trips requested in each pickup zone for each 5-minute period, and each morning yesterday's completed trips
@@ -15,7 +15,7 @@ in one table, so that I can send free drivers where the requests are and check y
 - **R050** IF a completed trip in the file has a fare that is missing, 0 or negative THEN THE SYSTEM SHALL leave it out of `trips_curated` and write it to table `trips_rejected` with the reason · BDD: [js01_yesterdays_trips.feature](../features/js01_yesterdays_trips.feature)
 - **R060** WHERE the system includes the assistant, WHEN the analyst asks about trip counts in plain language THE SYSTEM SHALL answer with the count the question asks for and state only counts that are in the rows its query returned | eval `count-answers` scores at least 0.8, which is 5 of its 6 cases correct (SLO) · BDD: [js01_count_questions.feature](../features/js01_count_questions.feature)
 
-## JS02 Driver: is the trip mine (focus)
+## JS02 Driver: is the trip mine
 
 When I accept a trip offer on my phone (other drivers nearby see the same offer), I want to know within 2 seconds
 whether the trip is mine, so that I do not drive to a pickup that another driver took.
