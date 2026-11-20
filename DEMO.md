@@ -46,7 +46,7 @@ JS03   requirements.md:25     trip_assignment.feature:2
 R090   requirements.md:29     trip_assignment.feature:37, design.md (6 lines)
 R100   requirements.md:30     trip_assignment.feature:46, design.md (6 lines)
 JS04   requirements.md:32     js04_pickup_place.feature:2
-R110   requirements.md:38     js04_pickup_place.feature:8, design.md (3 lines)
+R110   requirements.md:38     js04_pickup_place.feature:10, design.md (3 lines)
 RF010  requirements.md:44     js01_trips_per_zone.feature:58, design.md (5 lines)
 RF020  requirements.md:45     js01_trips_per_zone.feature:79, design.md (6 lines)
 RF030  requirements.md:46     trip_assignment.feature:17, design.md (4 lines)
@@ -70,25 +70,26 @@ RF050 and RQ010 are read, not run, so they do not have a rule. To see a problem,
 `SIM02` to `SIM09` in the feature file and run it again:
 `PROBLEM js01_trips_per_zone.feature:93: SIM09 is not defined in docs/design.md, section Data`, exit code 1.
 
-Step 8, the dry run on what a team hands in (tag `cp1`: no step code, `features/steps/.gitkeep` only):
+Step 8, the dry run on what a team hands in (tag `cp1`: step code only for the pickup-place feature, `features/steps/pickup_steps.py`, as a demonstration):
 
 ```
 $ git checkout -q cp1
 $ uvx behave@1.3.3 --dry-run --no-snippets        # last lines
-0 features passed, 0 failed, 4 error, 0 skipped
-0 rules passed, 0 failed, 13 error, 0 skipped
-0 scenarios passed, 0 failed, 19 error, 0 skipped
-0 steps passed, 0 failed, 0 skipped, 72 undefined
-$ grep -c "^ *Example:" features/*.feature        # 17 in all
+0 features passed, 0 failed, 3 error, 0 skipped, 1 untested
+0 rules passed, 0 failed, 12 error, 0 skipped, 1 untested
+0 scenarios passed, 0 failed, 17 error, 0 skipped, 3 untested
+0 steps passed, 0 failed, 0 skipped, 67 undefined, 9 untested
+$ grep -c "^ *Example:" features/*.feature        # 20 in all
 features/js01_yesterdays_trips.feature:3
-features/js01_count_questions.feature:2
-features/js01_trips_per_zone.feature:7
+features/js01_trips_per_zone.feature:9
 features/trip_assignment.feature:5
+features/js04_pickup_place.feature:3
 $ git checkout -q main
 ```
 
-"error" and "undefined" are what Monday looks like: every feature was read, and no step has code yet. The count
-of scenarios (17) equals the number of `Example:` lines.
+"error" and "undefined" are what Monday looks like: every feature was read, and no step has code yet. The 3
+examples of the pickup-place feature are "untested" because the demonstration gives their steps code. The count of
+scenarios (17 error and 3 untested, 20) equals the number of `Example:` lines.
 
 ## Checkpoint 2: the same text, running
 
@@ -127,7 +128,7 @@ Feature: Trips requested in each zone # features/js01_trips_per_zone.feature:2
   A table holds the only events of its example. Its columns are event fields listed in docs/design.md,
   section Data. A simulated data set is named by its id and described in the same section, under Simulated data
   for the demos.
-    Example: One request delivered twice                            # features/js01_trips_per_zone.feature:46
+    Example: One request delivered twice                            # features/js01_trips_per_zone.feature:60
       Given only these trip requests are received:                  # features/steps/data_steps.py:7
         | event_id  | trip_id | pickup_zone_id | event_time           | received_time        |
         | ev-000101 | t-0101  | 161            | 2026-11-23T09:11:00Z | 2026-11-23T09:11:01Z |
@@ -136,7 +137,7 @@ Feature: Trips requested in each zone # features/js01_trips_per_zone.feature:2
       When the counts are read at 2026-11-23T09:16:00Z              # features/steps/count_steps.py:24
       Then zone 161 shows 2 trips requested between 09:10 and 09:15 # features/steps/count_steps.py:29
 
-    Example: One simulated hour with 4 requests delivered twice                                # features/js01_trips_per_zone.feature:55
+    Example: One simulated hour with 4 requests delivered twice                                # features/js01_trips_per_zone.feature:69
       Given the simulated data set SIM01 "rush-hour"                                           # features/steps/data_steps.py:22
       When the counts are read at 2026-11-23T10:11:00Z                                         # features/steps/count_steps.py:24
       Then every zone and period shows the count computed from the data set's record of events # features/steps/count_steps.py:43
@@ -157,7 +158,7 @@ $ DEDUPE=off uv run behave --tags=@RF010          # from the first failure on
       ASSERT FAILED: zone 161, between 09:10 and 09:15: expected 2 trips requested, the system counted 3 (DEDUPE=off: the duplicate check is off)
 
 
-    Example: One simulated hour with 4 requests delivered twice                                # features/js01_trips_per_zone.feature:55
+    Example: One simulated hour with 4 requests delivered twice                                # features/js01_trips_per_zone.feature:69
       Given the simulated data set SIM01 "rush-hour"                                           # features/steps/data_steps.py:22
       When the counts are read at 2026-11-23T10:11:00Z                                         # features/steps/count_steps.py:24
       Then every zone and period shows the count computed from the data set's record of events # features/steps/count_steps.py:43
@@ -166,8 +167,8 @@ $ DEDUPE=off uv run behave --tags=@RF010          # from the first failure on
 
 
 Failing scenarios:
-  features/js01_trips_per_zone.feature:46  One request delivered twice
-  features/js01_trips_per_zone.feature:55  One simulated hour with 4 requests delivered twice
+  features/js01_trips_per_zone.feature:60  One request delivered twice
+  features/js01_trips_per_zone.feature:69  One simulated hour with 4 requests delivered twice
 
 0 features passed, 1 failed, 3 skipped
 0 rules passed, 1 failed, 12 skipped

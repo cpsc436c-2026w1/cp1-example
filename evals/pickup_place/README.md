@@ -18,7 +18,7 @@ The gate is the `@eval` example in `features/js04_pickup_place.feature`; its ste
 at `ask_model_live`, where the call through the course LLM gateway goes: it is not written yet, because a live run
 spends money and waits for the instructor's go.
 
-Output below is pasted from runs on 2026-11-20, branch `eval-prototype`.
+Output below is pasted from runs on 2026-11-20, branch `main`.
 
 ## Checker alone
 
@@ -48,19 +48,21 @@ USING RUNNER: behave.runner:Runner
 Feature: Pickup place of a rider's message # features/js04_pickup_place.feature:2
   Covers JS04 (support agent) in a system that includes the assistant, our extension. The assistant sends the
   rider's message to the model as the user message; the output format is a JSON object with one field,
-  pickup_place: a name from evals/pickup_place/places.txt, or null.
-    Example: Message that names a pickup place                                                  # features/js04_pickup_place.feature:10
+  pickup_place: a name from evals/pickup_place/places.txt, or null when the message names no pickup place.
+  Step code: this example repository has step code for this feature only, to show how an LLM eval runs in behave.
+  You do not write step code for Checkpoint 1.
+    Example: Message that names a pickup place                                                  # features/js04_pickup_place.feature:12
       Given the rider message "I'm waiting outside JFK Terminal 4, door 6. Where is my driver?" # features/steps/pickup_steps.py:43
       When the support agent opens the message                                                  # features/steps/pickup_steps.py:48
       Then the pickup place is "JFK Terminal 4"                                                 # features/steps/pickup_steps.py:57
 
-    Example: Message that names only a destination                                                    # features/js04_pickup_place.feature:15
+    Example: Message that names only a destination                                                    # features/js04_pickup_place.feature:17
       Given the rider message "Take me to Penn Station. I haven't decided where to be picked up yet." # features/steps/pickup_steps.py:43
       When the support agent opens the message                                                        # features/steps/pickup_steps.py:48
-      Then the pickup place is null                                                                   # features/steps/pickup_steps.py:62
+      Then the system says that the message names no pickup place                                     # features/steps/pickup_steps.py:62
 
     @eval
-    Example: Eval of pickup places                                   # features/js04_pickup_place.feature:21
+    Example: Eval of pickup places                                   # features/js04_pickup_place.feature:23
       Given the 10 cases of the eval "pickup-place"                  # features/steps/pickup_steps.py:67
       When the model that the system uses answers each case 3 times  # features/steps/pickup_steps.py:74
       Then the pickup place is correct in at least 24 of the 30 runs # features/steps/pickup_steps.py:86
@@ -94,8 +96,10 @@ $ uvx behave@1.3.3 features/js04_pickup_place.feature        # from the gate on
         10  null                      3 of 3   
       pickup place correct in 23 of 30 runs (accuracy 0.77)
 
+
+
 Failing scenarios:
-  features/js04_pickup_place.feature:21  Eval of pickup places
+  features/js04_pickup_place.feature:23  Eval of pickup places
 
 0 features passed, 1 failed, 0 skipped
 0 rules passed, 1 failed, 0 skipped
@@ -125,7 +129,7 @@ $ uvx behave@1.3.3 features/js04_pickup_place.feature        # from the gate on
 
 
 Failing scenarios:
-  features/js04_pickup_place.feature:21  Eval of pickup places
+  features/js04_pickup_place.feature:23  Eval of pickup places
 
 0 features passed, 1 failed, 0 skipped
 0 rules passed, 1 failed, 0 skipped
