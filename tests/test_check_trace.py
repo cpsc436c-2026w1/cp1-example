@@ -72,10 +72,10 @@ def test_planted_error_is_found(copy, name, file, old, new, message):
 
 
 def test_exemptions_are_not_problems(copy):
-    """RF050 (Read:) and RQ010 do not have a Rule, and R100 without a Scenario link may lose its Rule: not problems."""
+    """RF050 (Read:), RQ010 and RQ020 do not have a Rule, and R100 without a Scenario link may lose its Rule: not problems."""
     change(copy, REQ, "(SLO) [Scenario](../features/trip_assignment.feature)\n\n## JS04", "(SLO)\n\n## JS04")
     change(copy, ASSIGN, "  @R100\n", "")
     result = run(copy)
     assert result.returncode == 0, result.stdout
-    for code in ("R100", "RF050", "RQ010"):
+    for code in ("R100", "RF050", "RQ010", "RQ020"):
         assert not any(code in line for line in result.stdout.splitlines() if line.startswith("PROBLEM"))

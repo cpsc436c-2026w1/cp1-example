@@ -46,7 +46,8 @@ From the proposal feedback issue, with its IDs and wording.
 - **RF030** Say what happens when two drivers accept the same trip at the same moment, and show it. We: the write that assigns a trip has a condition: the trip is not assigned yet (R080). [Scenario](../features/trip_assignment.feature)
 - **RF040** The count by zone over 30 days must stay fast while the stream adds a small file to `raw/` every minute. We: a nightly job compacts each day of `raw/trip-events/` into one file, and the count reads those files; median under 5 s (SLO), run on AWS. [Scenario](../features/js01_yesterdays_trips.feature)
 - **RF050** Every AWS resource carries the course tags. We: each script in `scripts/` tags what it creates. Read: `scripts/` and the tags on the resources.
-- **RQ010** Say how long raw events are kept and who may delete them. Note for Checkpoint 1: at Checkpoint 2, `docs/design.md`, section Data, gives the days raw events are kept, the rule that deletes them and the role that may delete them. Read: `docs/design.md`, section Data.
+- **RQ010** Choose a meaningful long-term horizon for your system, for example 3 months, 6 months or a year, and calculate what your cloud architecture costs to run over it, in CAD, using the course price sheet. Note: We will calculate the cost of one year in CAD, based on the trip requests a day in DS01 (measured) and the course price sheet: processing the stream in Lambda, DynamoDB write units, and the Athena data scanned for the counts. Read: `docs/design.md`, section Cost.
+- **RQ020** Analyze your data latency against changes in your replay speed. Note: We will write the test that replays SIM01 at 1, 10 and 50 times its speed and checks R010's data latency at each speed. Read: `docs/design.md`, section Experiments, with the test's results.
 
 ## Evals
 

@@ -12,7 +12,7 @@ Before the studio: `uv` installed; `uv sync` once in this folder.
 |---|---|---|
 | 1 | `README.md`, the table | the upper rows are Monday's hand-in, the lower rows are Checkpoint 2 |
 | 2 | `docs/requirements.md`, JS01 | a story is a heading; under it lines R010 … in five forms: WHEN (R010), IF … THEN (R020), no keyword (R030), WHILE (R090 under JS03), WHERE with WHEN (R110 under JS04). A code is used once in the file; a number after `|` is the requirement's target; `[Scenario]` at the end of a line links the feature file that has its rule |
-| 3 | `docs/requirements.md`, Stakeholder input | the feedback codes with their wording, then `We:` and what the team does; the line ends with `[Scenario]` and the feature file (RF010 to RF040) or with `Read:` and what staff will read (RF050); RQ010 has a note for Checkpoint 1 that says what the team will show at Checkpoint 2; then the Evals entry for R110: cases, what counts as correct, runs, the count that passes, the model in use |
+| 3 | `docs/requirements.md`, Stakeholder input | the feedback codes with their wording, then `We:` and what the team does; the line ends with `[Scenario]` and the feature file (RF010 to RF040) or with `Read:` and what staff will read (RF050); RQ010 and RQ020 each have a `Note:` that says what the team will do and what it is based on (`We will calculate … based on …`, `We will write the test …`); then the Evals entry for R110: cases, what counts as correct, runs, the count that passes, the model in use |
 | 4 | `docs/design.md`, Data, Our data | four sentences: DS01 and DS02, the subset with its rows and size, and what the events are built from. Run the count below |
 | 5 | `docs/design.md`, Data, Simulated data for the demos | SIM01 to SIM05, one bullet each in words: what it holds, its injected faults with exact counts, the code it shows |
 | 6 | `docs/design.md`, Data, Event fields the scenarios use | one line for each kind of event; the fields are the columns of an example's table. Field types and valid values come at Checkpoint 2 |
@@ -53,20 +53,21 @@ RF030  requirements.md:46     trip_assignment.feature:17, design.md (4 lines)
 RF040  requirements.md:47     js01_yesterdays_trips.feature:32, design.md (6 lines)
 RF050  requirements.md:48     design.md (1 lines)
 RQ010  requirements.md:49     read, not run
-DS01   design.md:93           requirements.md:7, SIM01, SIM02, SIM03, SIM04, SIM05
+RQ020  requirements.md:50     read, not run
+DS01   design.md:93           requirements.md:7, requirements.md:49, SIM01, SIM02, SIM03, SIM04, SIM05
 DS02   design.md:97           not used
-SIM01  design.md:103          js01_trips_per_zone.feature:70
+SIM01  design.md:103          js01_trips_per_zone.feature:70, requirements.md:50
 SIM02  design.md:105          js01_trips_per_zone.feature:93
 SIM03  design.md:107          trip_assignment.feature:29
 SIM04  design.md:109          js01_yesterdays_trips.feature:11
 SIM05  design.md:111          js01_yesterdays_trips.feature:36
 
-27 codes and data ids, 0 problems
+28 codes and data ids, 0 problems
 $ echo $?
 0
 ```
 
-RF050 and RQ010 are read, not run, so they do not have a rule. To see a problem, change
+RF050, RQ010 and RQ020 are read, not run, so they do not have a rule. To see a problem, change
 `SIM02` to `SIM09` in the feature file and run it again:
 `PROBLEM js01_trips_per_zone.feature:93: SIM09 is not defined in docs/design.md, section Data`, exit code 1.
 
