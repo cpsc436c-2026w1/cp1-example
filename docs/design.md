@@ -111,7 +111,7 @@ gives the borough and name of each of its 265 zones. The system's events are sim
 - **SIM05 Thirty days.** 30 days of events in the three zones from DS01, about 525,000 trips, as one small file a
   minute. Shows RF040.
 
-**Event fields the scenarios use** (each delivery also has `received_time`, set when the event arrives):
+**Event format** (each delivery also has `received_time`, set when the event arrives):
 
 - `trip_requested`: `event_id`, `trip_id`, `pickup_zone_id`, `event_time`
 - `trip_accepted`: `event_id`, `trip_id`, `driver_id`, `event_time` (also the body of an accept sent to the API)

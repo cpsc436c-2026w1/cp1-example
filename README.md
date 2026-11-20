@@ -17,7 +17,7 @@ generator for three of the five data sets, and code for four of the thirteen rul
 |---|---|---|
 | `docs/proposal.md` | the proposal as tagged; sections 4 and 5 now point to the design | done |
 | `docs/requirements.md` | job stories JS01 to JS04 as headings; under each, requirement lines R010 … in EARS form, each ending with a `[Scenario]` link to its feature file; under Stakeholder input, the feedback codes RF010 … and RQ010, RQ020 as a list in the same form; one eval entry; assumptions | Monday |
-| `docs/design.md` | a sketch, workflows, resources with the script that will create each, what is outside the system, and the section Data: our data (DS01 …) in a few sentences, the simulated data for the demos (SIM01 …) as bullets in words, and the event fields the scenarios use | Monday |
+| `docs/design.md` | a sketch, workflows, resources with the script that will create each, what is outside the system, and the section Data: our data (DS01 …) in a few sentences, the simulated data for the demos (SIM01 …) as bullets in words, and the event format | Monday |
 | `features/*.feature` | one feature for what a user gets, tagged with its stories; one `Rule:` for each code, tagged with the code; examples with small tables or a data set named by id | Monday |
 | `features/steps/.gitkeep`, `behave.ini` | an empty folder, so that the dry run works; two display settings | Monday |
 | `tools/check_trace.py` | checks that every code and every data id is defined once and used where it must be | provided |
