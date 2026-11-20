@@ -6,10 +6,11 @@ skinparam defaultFontSize 12
 skinparam shadowing false
 skinparam roundCorner 6
 
-rectangle "Outside: the app, not ours" as outside {
+rectangle "Outside: not ours" as outside {
   agent "trips service" as svc
   agent "nightly export" as export
-  agent "rider's and analyst's pages" as pages
+  agent "rider's, analyst's and\nsupport agent's pages" as pages
+  agent "course LLM gateway" as gateway
 }
 
 rectangle "Our system: team t00, ca-central-1" as ours {
@@ -30,7 +31,7 @@ rectangle "Our system: team t00, ca-central-1" as ours {
 svc --> stream : trip events
 svc --> api : each accept
 export --> lake : one CSV a day
-pages --> api : reads, questions
+pages --> api : reads, rider messages
 
 stream --> count
 count --> counts
@@ -46,5 +47,5 @@ api --> read
 read --> trips
 read --> counts
 api --> assistant
-assistant --> lake : Athena
+assistant --> gateway : message
 @enduml

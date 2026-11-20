@@ -13,7 +13,6 @@ in one table, so that I can send free drivers where the requests are and check y
 - **R030** THE SYSTEM SHALL show every count with its zone and the start and end of its period [Scenario](../features/js01_trips_per_zone.feature)
 - **R040** WHEN the file of a day's completed trips arrives THE SYSTEM SHALL load each row that has a fare above 0 into table `trips_curated` | a file that arrives by 05:30 UTC is loaded before 06:00 UTC (SLO) [Scenario](../features/js01_yesterdays_trips.feature)
 - **R050** IF a completed trip in the file has a fare that is missing, 0 or negative THEN THE SYSTEM SHALL leave it out of `trips_curated` and write it to table `trips_rejected` with the reason [Scenario](../features/js01_yesterdays_trips.feature)
-- **R060** WHERE the system includes the assistant, WHEN the analyst asks about trip counts in plain language THE SYSTEM SHALL answer with the count the question asks for and state only counts that are in the rows its query returned | eval `count-answers` scores at least 0.8, which is 5 of its 6 cases correct (SLO) [Scenario](../features/js01_count_questions.feature)
 
 ## JS02 Driver: is the trip mine
 
@@ -30,6 +29,14 @@ When I have requested a trip, I want to see which driver is coming, so that I kn
 - **R090** WHILE a trip is assigned and not completed THE SYSTEM SHALL show the rider the trip's driver [Scenario](../features/trip_assignment.feature)
 - **R100** WHEN a trip is completed THE SYSTEM SHALL show the rider the fare | data latency under 5 s at p95, from the completion (SLO) [Scenario](../features/trip_assignment.feature)
 
+## JS04 Support agent: pickup place of a rider's message (added after the proposal)
+
+When a rider writes to support about a trip (free text, about 200 messages a day, Q040), I want to see the pickup
+place that the message names, or that it does not name one, so that I can find the trip without guessing where the
+rider was waiting.
+
+- **R110** WHERE the system includes the assistant, WHEN a support agent opens a rider's message THE SYSTEM SHALL show the pickup place that the message names, as a name from our list of places, or say that the message names no pickup place | eval `pickup-place`: at least 10 cases, each run 3 times, and the pickup place is correct in at least 80% of the runs (24 of 30 runs for 10 cases) [Scenario](../features/js04_pickup_place.feature)
+
 ## Stakeholder input
 
 From the proposal feedback issue, with its IDs and wording.
@@ -43,9 +50,12 @@ From the proposal feedback issue, with its IDs and wording.
 
 ## Evals
 
-| Eval | For | Cases | What counts as correct | Threshold |
-|---|---|---|---|---|
-| `count-answers` | R060 | 6 questions with the rows their query returns: 4 with the count, 2 with 0 rows (injected fault `no-rows`) | checked by code: the reply states the count asked for and only counts in the rows; without rows it says there is no data | 0.8: at least 5 of 6 |
+- **pickup-place**, for R110 [Scenario](../features/js04_pickup_place.feature)
+  - Cases: 10 rider messages written by the team, each with its reference value: 7 that name a pickup place, 3 that do not (one of them names only a destination). File `evals/pickup_place/cases.jsonl`; our list of places is `evals/pickup_place/places.txt`.
+  - Correct when (checked by code): the reply is a JSON object with one field, `pickup_place`, and its value equals the reference value. A reply with text around the JSON or with another field is not correct.
+  - Runs: each case 3 times, 30 runs, because the model's replies vary from run to run.
+  - Passes when: the pickup place is correct in at least 24 of the 30 runs (accuracy at least 80%).
+  - Model in use: Qwen 3.8 27B (`qwen3.8-27b`) through the course LLM gateway.
 
 ## Assumptions
 
@@ -54,3 +64,4 @@ From the proposal feedback issue, with its IDs and wording.
 | Q010 | Does a trip that the rider cancels still count as requested? | the operations analyst | yes, the count is of requests | R010, RF010 |
 | Q020 | Which driver gets the trip when two accept at the same moment? | the product owner | the one whose write reaches the table first | R080, RF030 |
 | Q030 | Can the app send an event again more than 24 hours after it first sent it? | the app's team | no: the app's retries end within minutes | RF010 |
+| Q040 | How many messages do riders send to support a day? | the support team's lead | about 200 | R110 |

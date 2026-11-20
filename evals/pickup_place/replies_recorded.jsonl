@@ -1,0 +1,30 @@
+{"case": 1, "run": 1, "kind": "recorded example, written by hand", "reply": "{\"pickup_place\": \"JFK Terminal 4\"}"}
+{"case": 1, "run": 2, "kind": "recorded example, written by hand", "reply": "{\"pickup_place\": \"JFK Terminal 4\"}"}
+{"case": 1, "run": 3, "kind": "recorded example, written by hand", "reply": "{\"pickup_place\": \"JFK Terminal 4\"}"}
+{"case": 2, "run": 1, "kind": "recorded example, written by hand", "reply": "{\"pickup_place\": \"Penn Station\"}"}
+{"case": 2, "run": 2, "kind": "recorded example, written by hand", "reply": "{\"pickup_place\": \"Penn Station\"}"}
+{"case": 2, "run": 3, "kind": "recorded example, written by hand", "reply": "{\"pickup_place\": \"Penn Station\"}"}
+{"case": 3, "run": 1, "kind": "recorded example, written by hand", "reply": "```json\n{\"pickup_place\": \"Grand Central Terminal\"}\n```"}
+{"case": 3, "run": 2, "kind": "recorded example, written by hand", "reply": "{\"pickup_place\": \"Grand Central Terminal\"}"}
+{"case": 3, "run": 3, "kind": "recorded example, written by hand", "reply": "{\"pickup_place\": \"Grand Central Terminal\"}"}
+{"case": 4, "run": 1, "kind": "recorded example, written by hand", "reply": "{\"pickup_place\": \"Times Square\"}"}
+{"case": 4, "run": 2, "kind": "recorded example, written by hand", "reply": "{\"pickup_place\": \"LaGuardia Terminal B\"}"}
+{"case": 4, "run": 3, "kind": "recorded example, written by hand", "reply": "{\"pickup_place\": \"Times Square\"}"}
+{"case": 5, "run": 1, "kind": "recorded example, written by hand", "reply": "{\"pickup_place\": \"Barclays Center\"}"}
+{"case": 5, "run": 2, "kind": "recorded example, written by hand", "reply": "{\"pickup_place\": \"Barclays Center\"}"}
+{"case": 5, "run": 3, "kind": "recorded example, written by hand", "reply": "{\"pickup_place\": \"Barclays Center\"}"}
+{"case": 6, "run": 1, "kind": "recorded example, written by hand", "reply": "{\"pickup_place\": \"LaGuardia Terminal B\"}"}
+{"case": 6, "run": 2, "kind": "recorded example, written by hand", "reply": "{\"pickup_place\": \"LaGuardia Terminal B\"}"}
+{"case": 6, "run": 3, "kind": "recorded example, written by hand", "reply": "{\"pickup_place\": \"LaGuardia Terminal B\"}"}
+{"case": 7, "run": 1, "kind": "recorded example, written by hand", "reply": "{\"pickup_place\": \"Yankee Stadium\"}"}
+{"case": 7, "run": 2, "kind": "recorded example, written by hand", "reply": "{\"pickup_place\": \"Yankee Stadium\"}"}
+{"case": 7, "run": 3, "kind": "recorded example, written by hand", "reply": "{\"pickup_place\": \"Yankee Stadium\"}"}
+{"case": 8, "run": 1, "kind": "recorded example, written by hand", "reply": "{\"pickup_place\": null}"}
+{"case": 8, "run": 2, "kind": "recorded example, written by hand", "reply": "{\"pickup_place\": \"Penn Station\"}"}
+{"case": 8, "run": 3, "kind": "recorded example, written by hand", "reply": "{\"pickup_place\": null}"}
+{"case": 9, "run": 1, "kind": "recorded example, written by hand", "reply": "{\"pickup_place\": null}"}
+{"case": 9, "run": 2, "kind": "recorded example, written by hand", "reply": "{\"pickup_place\": null}"}
+{"case": 9, "run": 3, "kind": "recorded example, written by hand", "reply": "{\"pickup_place\": null, \"reason\": \"a question about payment\"}"}
+{"case": 10, "run": 1, "kind": "recorded example, written by hand", "reply": "{\"pickup_place\": null}"}
+{"case": 10, "run": 2, "kind": "recorded example, written by hand", "reply": "{\"pickup_place\": null}"}
+{"case": 10, "run": 3, "kind": "recorded example, written by hand", "reply": "{\"pickup_place\": null}"}

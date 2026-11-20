@@ -73,7 +73,7 @@ def test_planted_error_is_found(copy, name, file, old, new, message):
 
 def test_exemptions_are_not_problems(copy):
     """RF050 (Read:) and RQ010 do not have a Rule, and R100 without a Scenario link may lose its Rule: not problems."""
-    change(copy, REQ, "(SLO) [Scenario](../features/trip_assignment.feature)\n\n## Stakeholder", "(SLO)\n\n## Stakeholder")
+    change(copy, REQ, "(SLO) [Scenario](../features/trip_assignment.feature)\n\n## JS04", "(SLO)\n\n## JS04")
     change(copy, ASSIGN, "  @R100\n", "")
     result = run(copy)
     assert result.returncode == 0, result.stdout

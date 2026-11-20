@@ -1,8 +1,8 @@
 # Studio demo: the rides example, file by file
 
 About one minute a step. Steps 1 to 8 are Checkpoint 1: **text that a team writes by Monday**, and the two checks
-of that text. Steps 9 to 12 show **where Checkpoint 2 goes**: the same text made to run. Nothing calls AWS.
-All output below is pasted from runs in this repository on 2026-11-19.
+of that text. Steps 9 to 13 show **where Checkpoint 2 goes**: the same text made to run. Nothing calls AWS.
+All output below is pasted from runs in this repository on 2026-11-19, steps 8, 10, 11 and 13 again on 2026-11-20.
 
 Before the studio: `uv` installed; `uv sync` once in this folder.
 
@@ -11,12 +11,12 @@ Before the studio: `uv` installed; `uv sync` once in this folder.
 | # | Show | Say |
 |---|---|---|
 | 1 | `README.md`, the table | the upper rows are Monday's hand-in, the lower rows are Checkpoint 2 |
-| 2 | `docs/requirements.md`, JS01 | a story is a heading; under it lines R010 … in five forms: WHEN (R010), IF … THEN (R020), no keyword (R030), WHERE with WHEN (R060), WHILE (R090 under JS03). A code is used once in the file; a number after `|` is the requirement's target; `[Scenario]` at the end of a line links the feature file that has its rule |
-| 3 | `docs/requirements.md`, Stakeholder input | the feedback codes with their wording, then `We:` and what the team does; the line ends with `[Scenario]` and the feature file (RF010 to RF040) or with `Read:` and what staff will read (RF050); RQ010 has a note for Checkpoint 1 that says what the team will show at Checkpoint 2; the eval row for R060 |
+| 2 | `docs/requirements.md`, JS01 | a story is a heading; under it lines R010 … in five forms: WHEN (R010), IF … THEN (R020), no keyword (R030), WHILE (R090 under JS03), WHERE with WHEN (R110 under JS04). A code is used once in the file; a number after `|` is the requirement's target; `[Scenario]` at the end of a line links the feature file that has its rule |
+| 3 | `docs/requirements.md`, Stakeholder input | the feedback codes with their wording, then `We:` and what the team does; the line ends with `[Scenario]` and the feature file (RF010 to RF040) or with `Read:` and what staff will read (RF050); RQ010 has a note for Checkpoint 1 that says what the team will show at Checkpoint 2; then the Evals entry for R110: cases, what counts as correct, runs, the count that passes, the model in use |
 | 4 | `docs/design.md`, Data, Our data | four sentences: DS01 and DS02, the subset with its rows and size, and what the events are built from. Run the count below |
 | 5 | `docs/design.md`, Data, Simulated data for the demos | SIM01 to SIM05, one bullet each in words: what it holds, its injected faults with exact counts, the code it shows |
 | 6 | `docs/design.md`, Data, Event fields the scenarios use | one line for each kind of event; the fields are the columns of an example's table. Field types and valid values come at Checkpoint 2 |
-| 7 | `features/js01_trips_per_zone.feature`, rule `@RF010` | story tag on the feature, code tag on the rule; one example with a 3-row table, one with `Given the simulated data set SIM01 "rush-hour"`. Then `trip_assignment.feature`: two story tags, a rule with two code tags (`@R080 @RF030`). Then the `@eval` gate in `js01_count_questions.feature` |
+| 7 | `features/js01_trips_per_zone.feature`, rule `@RF010` | story tag on the feature, code tag on the rule; one example with a 3-row table, one with `Given the simulated data set SIM01 "rush-hour"`. Then `trip_assignment.feature`: two story tags, a rule with two code tags (`@R080 @RF030`). Then the `@eval` gate in `js04_pickup_place.feature` |
 | 8 | the two checks below | the traceability table, then the dry run on the Monday state |
 
 Step 4, one number of Our data checked (reads the file's footer over HTTPS):
@@ -33,34 +33,35 @@ Step 8, traceability:
 ```
 $ python3 tools/check_trace.py
 Code   Defined                Used
-JS01   requirements.md:5      js01_count_questions.feature:2, js01_trips_per_zone.feature:2, js01_yesterdays_trips.feature:2
+JS01   requirements.md:5      js01_trips_per_zone.feature:2, js01_yesterdays_trips.feature:2
 R010   requirements.md:11     js01_trips_per_zone.feature:10, design.md (4 lines)
 R020   requirements.md:12     js01_trips_per_zone.feature:23, design.md (3 lines)
 R030   requirements.md:13     js01_trips_per_zone.feature:48, design.md (4 lines)
 R040   requirements.md:14     js01_yesterdays_trips.feature:8, design.md (5 lines)
 R050   requirements.md:15     js01_yesterdays_trips.feature:16, design.md (4 lines)
-R060   requirements.md:16     js01_count_questions.feature:6, design.md (3 lines)
-JS02   requirements.md:18     trip_assignment.feature:2
-R070   requirements.md:23     trip_assignment.feature:9, design.md (5 lines)
-R080   requirements.md:24     trip_assignment.feature:17, design.md (5 lines)
-JS03   requirements.md:26     trip_assignment.feature:2
-R090   requirements.md:30     trip_assignment.feature:37, design.md (6 lines)
-R100   requirements.md:31     trip_assignment.feature:46, design.md (6 lines)
-RF010  requirements.md:37     js01_trips_per_zone.feature:58, design.md (5 lines)
-RF020  requirements.md:38     js01_trips_per_zone.feature:79, design.md (6 lines)
-RF030  requirements.md:39     trip_assignment.feature:17, design.md (4 lines)
-RF040  requirements.md:40     js01_yesterdays_trips.feature:32, design.md (6 lines)
-RF050  requirements.md:41     design.md (1 lines)
-RQ010  requirements.md:42     read, not run
-DS01   design.md:90           requirements.md:7, SIM01, SIM02, SIM03, SIM04, SIM05
-DS02   design.md:94           not used
-SIM01  design.md:100          js01_trips_per_zone.feature:70
-SIM02  design.md:102          js01_trips_per_zone.feature:93
-SIM03  design.md:104          trip_assignment.feature:29
-SIM04  design.md:106          js01_yesterdays_trips.feature:11
-SIM05  design.md:108          js01_yesterdays_trips.feature:36
+JS02   requirements.md:17     trip_assignment.feature:2
+R070   requirements.md:22     trip_assignment.feature:9, design.md (5 lines)
+R080   requirements.md:23     trip_assignment.feature:17, design.md (5 lines)
+JS03   requirements.md:25     trip_assignment.feature:2
+R090   requirements.md:29     trip_assignment.feature:37, design.md (6 lines)
+R100   requirements.md:30     trip_assignment.feature:46, design.md (6 lines)
+JS04   requirements.md:32     js04_pickup_place.feature:2
+R110   requirements.md:38     js04_pickup_place.feature:8, design.md (3 lines)
+RF010  requirements.md:44     js01_trips_per_zone.feature:58, design.md (5 lines)
+RF020  requirements.md:45     js01_trips_per_zone.feature:79, design.md (6 lines)
+RF030  requirements.md:46     trip_assignment.feature:17, design.md (4 lines)
+RF040  requirements.md:47     js01_yesterdays_trips.feature:32, design.md (6 lines)
+RF050  requirements.md:48     design.md (1 lines)
+RQ010  requirements.md:49     read, not run
+DS01   design.md:93           requirements.md:7, SIM01, SIM02, SIM03, SIM04, SIM05
+DS02   design.md:97           not used
+SIM01  design.md:103          js01_trips_per_zone.feature:70
+SIM02  design.md:105          js01_trips_per_zone.feature:93
+SIM03  design.md:107          trip_assignment.feature:29
+SIM04  design.md:109          js01_yesterdays_trips.feature:11
+SIM05  design.md:111          js01_yesterdays_trips.feature:36
 
-26 codes and data ids, 0 problems
+27 codes and data ids, 0 problems
 $ echo $?
 0
 ```
@@ -96,7 +97,8 @@ of scenarios (17) equals the number of `Example:` lines.
 | 9 | `sim/datasets.py` beside Data, Simulated data for the demos; run the generator | the bullets became settings; the id is the folder name; the folders are those of `raw/trip-events/` |
 | 10 | run `@RF010`; ask for a prediction; run it with `DEDUPE=off` | the example knew its answer before the system ran; with the check off the count is 3, not 2, and the simulated hour with its 4 duplicates fails too |
 | 11 | run `@RF020` and `@RF030` | a zone without events is `no data`; two accepts, each sent before the other has an answer: the conditional write gives the trip to one driver and refuses the other |
-| 12 | `uv run pytest -q` | the generator's seed, the local code (with the two accepts without the condition: both drivers are told assigned), the checker with a planted error for each rule |
+| 12 | run `features/js04_pickup_place.feature`; then `check.py` alone | the gate reads the eval's counts from its steps: 10 cases, 3 runs each, at least 24 of 30 correct. The replies are recorded examples written by hand; a live run through the course LLM gateway is not written yet |
+| 13 | `uv run pytest -q` | the generator's seed, the local code (with the two accepts without the condition: both drivers are told assigned), the checker with a planted error for each rule, the eval's checker |
 
 Step 9:
 
@@ -141,8 +143,8 @@ Feature: Trips requested in each zone # features/js01_trips_per_zone.feature:2
 
 1 feature passed, 0 failed, 3 skipped
 1 rule passed, 0 failed, 12 skipped
-2 scenarios passed, 0 failed, 17 skipped
-6 steps passed, 0 failed, 66 skipped
+2 scenarios passed, 0 failed, 18 skipped
+6 steps passed, 0 failed, 70 skipped
 Took 0min 0.000s
 ```
 
@@ -169,8 +171,8 @@ Failing scenarios:
 
 0 features passed, 1 failed, 3 skipped
 0 rules passed, 1 failed, 12 skipped
-0 scenarios passed, 2 failed, 17 skipped
-4 steps passed, 2 failed, 66 skipped
+0 scenarios passed, 2 failed, 18 skipped
+4 steps passed, 2 failed, 70 skipped
 Took 0min 0.000s
 ```
 
@@ -180,27 +182,29 @@ Step 11 (last lines of each):
 $ uv run behave --tags=@RF020
 1 feature passed, 0 failed, 3 skipped
 1 rule passed, 0 failed, 12 skipped
-2 scenarios passed, 0 failed, 17 skipped
-10 steps passed, 0 failed, 62 skipped
+2 scenarios passed, 0 failed, 18 skipped
+10 steps passed, 0 failed, 66 skipped
 Took 0min 0.000s
 $ uv run behave --tags=@RF030
 1 feature passed, 0 failed, 3 skipped
 1 rule passed, 0 failed, 12 skipped
-2 scenarios passed, 0 failed, 17 skipped
-8 steps passed, 0 failed, 64 skipped
+2 scenarios passed, 0 failed, 18 skipped
+8 steps passed, 0 failed, 68 skipped
 Took 0min 0.000s
 ```
 
-Step 12:
+Step 12: see `evals/pickup_place/README.md` for the output, with a forced failure.
+
+Step 13:
 
 ```
 $ uv run pytest -q
 ...............................                                          [100%]
-31 passed in 1.95s
+35 passed in 1.96s
 ```
 
 ## What stays a draft
 
-The rules R010, R020, R030, R040, R050, R060, R070, R090, R100 and RF040 have examples and no step code; SIM04 and SIM05
+The rules R010, R020, R030, R040, R050, R070, R090, R100 and RF040 have examples and no step code; SIM04 and SIM05
 are described and not generated; no script in `scripts/` exists. That is the state the text is in on Monday for
 every rule.

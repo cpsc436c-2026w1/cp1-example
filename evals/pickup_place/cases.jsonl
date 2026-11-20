@@ -1,0 +1,10 @@
+{"case": 1, "message": "I'm waiting outside JFK Terminal 4, door 6. Where is my driver?", "pickup_place": "JFK Terminal 4"}
+{"case": 2, "message": "Picked up at Penn Station at 8:10 and the driver took the long way to Brooklyn.", "pickup_place": "Penn Station"}
+{"case": 3, "message": "My pickup was Grand Central, the 42nd St side, and I was charged twice.", "pickup_place": "Grand Central Terminal"}
+{"case": 4, "message": "I left my umbrella in the car. Trip from Times Square to LaGuardia this morning.", "pickup_place": "Times Square"}
+{"case": 5, "message": "The driver could not find me at the Barclays Center, Atlantic Ave entrance.", "pickup_place": "Barclays Center"}
+{"case": 6, "message": "lga terminal B arrivals, been waiting 20 min", "pickup_place": "LaGuardia Terminal B"}
+{"case": 7, "message": "From Yankee Stadium to Midtown, and the fare was $48. Too high.", "pickup_place": "Yankee Stadium"}
+{"case": 8, "message": "Take me to Penn Station. I haven't decided where to be picked up yet.", "pickup_place": null}
+{"case": 9, "message": "How do I change the card on my account?", "pickup_place": null}
+{"case": 10, "message": "The driver was rude and the car smelled of smoke.", "pickup_place": null}
