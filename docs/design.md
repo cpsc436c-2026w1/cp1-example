@@ -110,7 +110,7 @@ dates they are moved to (*our choice*).
 
 - **SIM01 Rush hour** [RF010] One morning hour from DS01: the 837 trips requested in zones 48, 161 and 230 on
   2024-03-14 between 08:00 and 09:00 New York time, moved to 09:00 to 10:00 UTC on 2026-11-23: 304, 191 and 342
-  trips, 2,511 events. 4 requests arrive twice and 2 arrive 6 to 10 minutes late.
+  trips, 2,511 events sent as 2,515 deliveries: 4 requests arrive twice, and 2 arrive 6 to 10 minutes late.
 - **SIM02 Quiet zone** [RF020] SIM01's hour from DS01 without its 6 faults, and without the 60 trips of zone 48
   requested between 09:25 and 09:35: 777 trips (244, 191 and 342 in zones 48, 161 and 230), 2,331 events.
 - **SIM03 Double accept** [R080, RF030] The first 20 trips of zone 161 in SIM01's hour from DS01, at the same times:
