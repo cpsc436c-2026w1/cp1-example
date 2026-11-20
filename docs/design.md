@@ -17,7 +17,7 @@ Each workflow names the codes it serves and the components it uses; every compon
 ### Counting requests · R010, R020, RF010, RF020
 
 The trips service sends each trip event to the stream. The counting function counts requests by pickup zone in
-5-minute periods and stores each count within 60 s of the period's end; a late request corrects the count of its
+5-minute periods and stores each count within 60 s of the period's end (p95); a late request corrects the count of its
 period. It writes each event's id together with the count, so an event delivered twice is counted once.
 
 Components: `t00-trip-events`, `t00-count-requests`, `t00-zone-counts`, `t00-seen-events`
@@ -26,7 +26,7 @@ Components: `t00-trip-events`, `t00-count-requests`, `t00-zone-counts`, `t00-see
 
 The tracking function keeps each trip current from the stream. A driver's accept comes to the API as one request;
 the assign function makes one conditional write, so only one of two accepts for a trip is answered `assigned`,
-within 2 s.
+within 2 s (p99).
 
 Components: `t00-trip-events`, `t00-track-trips`, `t00-api`, `t00-assign-trip`, `t00-trips`
 

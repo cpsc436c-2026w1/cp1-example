@@ -8,8 +8,8 @@ When demand moves between zones during the morning rush (about 840 requests an h
 number of trips requested in each pickup zone for each 5-minute period, and each morning yesterday's completed trips
 in one table, so that I can send free drivers where the requests are and check yesterday's fares.
 
-- **R010** WHEN a 5-minute period ends THE SYSTEM SHALL store one count of requested trips for each pickup zone that had a request in the period | within 60 s of the period's end, from the requests received by then (SLO) · BDD: [js01_trips_per_zone.feature](../features/js01_trips_per_zone.feature)
-- **R020** IF a request is received after its period ended THEN THE SYSTEM SHALL add it to the stored count of the period of its event time, and store a count of 1 if its zone does not have a count for that period yet | a request received up to 10 minutes after its event time is in the count within 60 s of its receipt (SLO) · BDD: [js01_trips_per_zone.feature](../features/js01_trips_per_zone.feature)
+- **R010** WHEN a 5-minute period ends THE SYSTEM SHALL store one count of requested trips for each pickup zone that had a request in the period | data latency under 60 s at p95, from the period's end to the stored count, from the requests received by then (SLO) · BDD: [js01_trips_per_zone.feature](../features/js01_trips_per_zone.feature)
+- **R020** IF a request is received after its period ended THEN THE SYSTEM SHALL add it to the stored count of the period of its event time, and store a count of 1 if its zone does not have a count for that period yet | for a request received up to 10 minutes after its event time, data latency under 60 s at p95, from its receipt to the corrected count (SLO) · BDD: [js01_trips_per_zone.feature](../features/js01_trips_per_zone.feature)
 - **R030** THE SYSTEM SHALL show every count with its zone and the start and end of its period · BDD: [js01_trips_per_zone.feature](../features/js01_trips_per_zone.feature)
 - **R040** WHEN the file of a day's completed trips arrives THE SYSTEM SHALL load each row that has a fare above 0 into table `trips_curated` | a file that arrives by 05:30 UTC is loaded before 06:00 UTC (SLO) · BDD: [js01_yesterdays_trips.feature](../features/js01_yesterdays_trips.feature)
 - **R050** IF a completed trip in the file has a fare that is missing, 0 or negative THEN THE SYSTEM SHALL leave it out of `trips_curated` and write it to table `trips_rejected` with the reason · BDD: [js01_yesterdays_trips.feature](../features/js01_yesterdays_trips.feature)
@@ -20,15 +20,15 @@ in one table, so that I can send free drivers where the requests are and check y
 When I accept a trip offer on my phone (other drivers nearby see the same offer), I want to know within 2 seconds
 whether the trip is mine, so that I do not drive to a pickup that another driver took.
 
-- **R070** WHEN a driver accepts a trip that is requested and not assigned THE SYSTEM SHALL assign the trip to that driver | the driver has the answer within 2 s (SLO) · BDD: [trip_assignment.feature](../features/trip_assignment.feature)
-- **R080** IF a driver accepts a trip that is already assigned THEN THE SYSTEM SHALL refuse the accept and leave the trip with its driver | the driver has the answer within 2 s (SLO) · BDD: [trip_assignment.feature](../features/trip_assignment.feature)
+- **R070** WHEN a driver accepts a trip that is requested and not assigned THE SYSTEM SHALL assign the trip to that driver | response time under 2 s at p99, from the accept reaching our API to the driver's answer (SLO) · BDD: [trip_assignment.feature](../features/trip_assignment.feature)
+- **R080** IF a driver accepts a trip that is already assigned THEN THE SYSTEM SHALL refuse the accept and leave the trip with its driver | response time under 2 s at p99, from the accept reaching our API to the driver's answer (SLO) · BDD: [trip_assignment.feature](../features/trip_assignment.feature)
 
 ## JS03 Rider: who is coming
 
 When I have requested a trip, I want to see which driver is coming, so that I know which car to look for.
 
 - **R090** WHILE a trip is assigned and not completed THE SYSTEM SHALL show the rider the trip's driver · BDD: [trip_assignment.feature](../features/trip_assignment.feature)
-- **R100** WHEN a trip is completed THE SYSTEM SHALL show the rider the fare | within 5 s of the completion (SLO) · BDD: [trip_assignment.feature](../features/trip_assignment.feature)
+- **R100** WHEN a trip is completed THE SYSTEM SHALL show the rider the fare | data latency under 5 s at p95, from the completion (SLO) · BDD: [trip_assignment.feature](../features/trip_assignment.feature)
 
 ## Constraints and requests
 
