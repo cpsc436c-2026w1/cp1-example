@@ -75,6 +75,8 @@ def main(argv: list[str]) -> int:
     replies = load_replies(replies_path)
     kinds = sorted({r.get("kind", "") for r in replies})
     print(f"replies: {replies_path.name}, {len(replies)} lines ({', '.join(kinds)})")
+    if any(k.startswith("recorded") for k in kinds):
+        print("checker only, recorded replies: this run checks the checker, not the model; R110 needs a live run")
     print(report(check(load_cases(), replies)))
     return 0
 

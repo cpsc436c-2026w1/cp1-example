@@ -12,8 +12,8 @@ zone, gives drivers and riders one answer about who has a trip, and keeps comple
 
 From Checkpoint 1 the stories are headings in [`requirements.md`](requirements.md); that file is the record.
 
-- **JS01 Operations analyst: trips requested in each zone** (focus, operational and analytical)
-- **JS02 Driver: is the trip mine** (focus, operational)
+- **JS01 Operations analyst: trips requested in each zone** (operational and analytical)
+- **JS02 Driver: is the trip mine** (operational)
 - **JS03 Rider: who is coming**
 
 ## 3. Project shape and extensions

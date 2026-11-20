@@ -1,21 +1,21 @@
 #!/usr/bin/env python3
-"""Traceability check: does every code appear where it must?
+"""Traceability check: does every ID appear where it must?
 
     python3 tools/check_trace.py [folder]     # folder: the repository root (default: the current folder)
 
 It reads docs/requirements.md, docs/design.md and features/*.feature, prints one line for each problem, then a
-table code -> where defined -> where used. Exit code 1 if there is a problem, else 0. Standard library only.
+table ID -> where defined -> where used. Exit code 1 if there is a problem, else 0. Standard library only.
 
 The rules:
-  1. Every JS, R, RF and RQ code is defined once in docs/requirements.md: a JS where its heading starts with it
+  1. Every JS, R, RF and RQ ID is defined once in docs/requirements.md: a JS where its heading starts with it
      (## JS01 ...), an R, RF or RQ where a list item starts with it (- **R010** ..., - **RF010** ...).
   2. Every R or RF line that ends with a Scenario link (`[Scenario](../features/<file>.feature)`) is the tag of a
      Rule in that feature file. (An RF with "Read: ..." and an RQ do not get a rule;
      an RF line names the R lines that meet it as Reply [R080]: ...)
-  3. Every code used as a tag in features/ or named in docs/design.md is defined in docs/requirements.md
+  3. Every ID used as a tag in features/ or named in docs/design.md is defined in docs/requirements.md
      (in design.md the IDs an item serves are in brackets after its name: ### Counting requests [R010, R020],
      - **SIM01 Rush hour** [RF010]; and in the IDs column of Resources).
-  4. A code is the tag of one Rule only.
+  4. An ID is the tag of one Rule only.
   5. Every DS and SIM id is defined once in docs/design.md, section Data: a DS where "Our data" first names it,
      a SIM as a bullet under "Simulated data" that starts with its id (- **SIM01 Rush hour** [RF010] ...).
   6. Every DS or SIM id used in features/ or in docs/requirements.md is defined there.
@@ -155,10 +155,10 @@ def main(argv: list[str]) -> int:
     problems, table = check(root)
     for problem in problems:
         print("PROBLEM", problem)
-    print(f"{'Code':6} {'Defined':22} Used")
+    print(f"{'ID':6} {'Defined':22} Used")
     for code, place, used in table:
         print(f"{code:6} {place:22} {used}")
-    print(f"\n{len(table)} codes and data ids, {len(problems)} problems")
+    print(f"\n{len(table)} IDs, {len(problems)} problems")
     return 1 if problems else 0
 
 

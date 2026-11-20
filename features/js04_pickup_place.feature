@@ -2,7 +2,8 @@
 Feature: Pickup place of a rider's message
   Covers JS04 (support agent) in a system that includes the assistant, our extension. The assistant sends the
   rider's message to the model as the user message; the output format is a JSON object with one field,
-  pickup_place: a name from evals/pickup_place/places.txt, or null when the message names no pickup place.
+  pickup_place: a name from evals/pickup_place/places.txt, null when the message names no pickup place, or
+  "more than one" when it names more than one.
   Step code: this example repository has step code for this feature only, to show how an LLM eval runs in behave.
   You do not write step code for Checkpoint 1.
 
@@ -24,3 +25,11 @@ Feature: Pickup place of a rider's message
       Given the 10 cases of the eval "pickup-place"
       When the model that the system uses answers each case 3 times
       Then the pickup place is correct in at least 24 of the 30 runs
+
+  @R120
+  Rule: If a rider's message names more than one pickup place, the system says so and does not show any of them as the pickup place
+
+    Example: Message that names two pickup places
+      Given the rider message "Pick me up at Penn Station or at Grand Central Terminal, whichever is faster for the driver."
+      When the support agent opens the message
+      Then the system says that the message names more than one pickup place

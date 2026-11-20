@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 
 from behave import given, then, when
+from behave.api.pending_step import StepNotImplementedError
 
 EVAL_DIR = Path(__file__).resolve().parents[2] / "evals" / "pickup_place"
 EVALS = {"pickup-place": EVAL_DIR}
@@ -36,7 +37,8 @@ def ask_model_live(message: str) -> str:
 
 def recorded_reply(message: str, run: int = 1) -> str:
     cases = {c["message"]: c["case"] for c in checker.load_cases()}
-    assert message in cases, "this message is not a case of evals/pickup_place/cases.jsonl, so it does not have a recorded reply"
+    if message not in cases:                        # a draft example: there is not a recorded reply to show
+        raise StepNotImplementedError("this message is not a case of evals/pickup_place/cases.jsonl, so it does not have a recorded reply")
     return next(r["reply"] for r in checker.load_replies() if r["case"] == cases[message] and r["run"] == run)
 
 
