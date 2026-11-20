@@ -11,10 +11,10 @@ is outside our system.
 
 ## Workflows
 
-Each workflow names the codes it serves and the components it uses; every component is a row in
+Each workflow names the IDs it serves in brackets after its name, and the components it uses; every component is a row in
 [Resources](#resources).
 
-### Counting requests · R010, R020, RF010, RF020
+### Counting requests [R010, R020, RF010, RF020]
 
 The trips service sends each trip event to the stream. The counting function counts requests by pickup zone in
 5-minute periods and stores each count within 60 s of the period's end (p95); a late request corrects the count of its
@@ -22,7 +22,7 @@ period. It writes each event's id together with the count, so an event delivered
 
 Components: `t00-trip-events`, `t00-count-requests`, `t00-zone-counts`, `t00-seen-events`
 
-### Assigning trips · R070, R080, R090, R100, RF030
+### Assigning trips [R070, R080, R090, R100, RF030]
 
 The tracking function keeps each trip current from the stream. A driver's accept comes to the API as one request;
 the assign function makes one conditional write, so only one of two accepts for a trip is answered `assigned`,
@@ -30,14 +30,14 @@ within 2 s (p99).
 
 Components: `t00-trip-events`, `t00-track-trips`, `t00-api`, `t00-assign-trip`, `t00-trips`
 
-### Reading counts and trips · R030, R090, R100, RF020
+### Reading counts and trips [R030, R090, R100, RF020]
 
 The read function answers the rider's and the analyst's pages through the API. A zone and period without a count
 is shown as no data, not as 0.
 
 Components: `t00-api`, `t00-read`, `t00-zone-counts`, `t00-trips`
 
-### Lake and nightly jobs · R040, R050, RF040
+### Lake and nightly jobs [R040, R050, RF040]
 
 Firehose writes the stream to the bucket about once a minute, and at 00:30 UTC the compaction job rewrites the day
 before as one Parquet file. The curation job loads the nightly export's completed trips with a fare above 0 before
@@ -45,7 +45,7 @@ before as one Parquet file. The curation job loads the nightly export's complete
 
 Components: `t00-trip-events-to-lake`, `t00-lake-<account-id>`, `t00_lake`, `t00-compact-events`, `t00-curate-trips`
 
-### Pickup place of a message · R110
+### Pickup place of a message [R110]
 
 The support agent's page sends a rider's message through the API to the assistant function. The function sends it
 to the model through the course LLM gateway as the user message, with our list of places in the system prompt and
@@ -59,7 +59,7 @@ Components: `t00-api`, `t00-assistant`
 Every resource is in ca-central-1, has a name that starts with `t00-` (the Glue database uses `t00_lake`), and
 carries the tags `Project=436c`, `Team=t00`, `Owner=<name>` (RF050). The scripts are written at Checkpoint 2.
 
-| Resource | Name | Created by | Serves |
+| Resource | Name | Created by | IDs |
 |---|---|---|---|
 | Kinesis data stream | `t00-trip-events` | `scripts/stream.py up` | R010, R020, RF010 |
 | Lambda function | `t00-count-requests` | `scripts/counting.py up` | R010, R020, RF010, RF020 |
