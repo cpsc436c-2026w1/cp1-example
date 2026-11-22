@@ -91,7 +91,7 @@ Outside our system. We do not create these; our system relies on what the last c
 | the app's trips service | each accept, as one request | API `t00-api` | the body holds `event_id`, `trip_id`, `driver_id` and `event_time`; the app passes our answer to the driver's phone |
 | the app's nightly export | one CSV file with the day's completed trips | `raw/trip-exports/dt=<day>/` in our bucket | the columns are the fields of `trip_completed`; the file arrives by 05:30 UTC |
 | the rider's page, the analyst's browser and the support agent's page | reads and rider messages | API `t00-api` | none |
-| the course LLM gateway | the model's reply to each message | function `t00-assistant` | for each key at most 2 CAD and 120 requests a minute |
+| the course LLM gateway | the model's reply to each message | function `t00-assistant` | the team's keys share one pool of 7.25 CAD (5 USD); 120 requests a minute per key |
 
 ## Data
 
