@@ -6,7 +6,7 @@ Feature: Yesterday's completed trips in one table
   Each example starts with tables trips_curated and trips_rejected empty.
 
   @R040
-  Rule: When the file of a day's completed trips arrives, each row that has a fare above 0 is loaded into table trips_curated
+  Rule: When the file of a day's completed trips arrives, the system shall load each row that has a fare above 0 into table trips_curated
 
     Example: File for 2026-11-22
       Given the simulated data set SIM04 "trips-day"
@@ -14,7 +14,7 @@ Feature: Yesterday's completed trips in one table
       Then by 2026-11-23T05:30:00Z table trips_curated has 19074 rows for 2026-11-22
 
   @R050
-  Rule: If a completed trip in the file has a fare that is missing, 0 or negative, it is left out of trips_curated and written to trips_rejected with the reason
+  Rule: If a completed trip in the file has a fare that is missing, 0 or negative, then the system shall leave it out of trips_curated and write it to table trips_rejected with the reason
 
     Example: File with a missing, a zero and a negative fare
       Given a file of completed trips with these rows:

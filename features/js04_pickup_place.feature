@@ -8,7 +8,7 @@ Feature: Pickup place of a rider's message
   You do not write step code for Checkpoint 1.
 
   @R110
-  Rule: Where the system includes the assistant, a rider's message is shown with the pickup place it names, or the system says that it names no pickup place
+  Rule: Where the system includes the assistant, when a support agent opens a rider's message, the system shall show the pickup place that the message names, as a name from our list of places, or say that the message names no pickup place
 
     Example: Message that names a pickup place
       Given the rider message "I'm waiting outside JFK Terminal 4, door 6. Where is my driver?"
@@ -27,7 +27,7 @@ Feature: Pickup place of a rider's message
       Then the pickup place is correct in at least 24 of the 30 runs
 
   @R120
-  Rule: If a rider's message names more than one pickup place, the system says so and does not show any of them as the pickup place
+  Rule: If a rider's message names more than one pickup place, then the system shall say that the message names more than one pickup place, and not show any of them as the pickup place
 
     Example: Message that names two pickup places
       Given the rider message "Pick me up at Penn Station or at Grand Central Terminal, whichever is faster for the driver."

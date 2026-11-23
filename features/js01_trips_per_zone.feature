@@ -7,7 +7,7 @@ Feature: Trips requested in each zone
   for the demos.
 
   @R010
-  Rule: When a 5-minute period ends, one count of requested trips is stored for each pickup zone that had a request
+  Rule: When a 5-minute period ends, the system shall store one count of requested trips for each pickup zone that had a request in the period
 
     Example: Three requests in one period
       Given only these trip requests are received:
@@ -20,7 +20,7 @@ Feature: Trips requested in each zone
       And within 30 s zone 230 has 1 trip requested between 09:00 and 09:05
 
   @R020
-  Rule: If a request is received after its period ended, it is added to the stored count of the period of its event time
+  Rule: If a request is received after its period ended, then the system shall add it to the stored count of the period of its event time, and store a count of 1 if its zone does not have a count for that period yet
 
     Example: One late request in a zone without a count
       Given only these trip requests are received:
@@ -37,7 +37,7 @@ Feature: Trips requested in each zone
       When the time is 2026-11-23T09:11:30Z
       Then zone 161 has 2 trips requested between 09:00 and 09:05
 
-    Example: Late request at the boundary goes to the period it starts
+    Example: A late request at a period boundary
       Given only these trip requests are received:
         | event_id  | trip_id | pickup_zone_id | event_time           | received_time        |
         | ev-000014 | t-0014  | 161            | 2026-11-23T09:05:00Z | 2026-11-23T09:11:30Z |
@@ -45,7 +45,7 @@ Feature: Trips requested in each zone
       Then zone 161 has 1 trip requested between 09:05 and 09:10
 
   @R030
-  Rule: Every count is shown with its zone and the start and end of its period
+  Rule: The system shall show every count with its zone and the start and end of its period
 
     Example: One count on the dashboard
       Given only these trip requests are received:
@@ -55,7 +55,7 @@ Feature: Trips requested in each zone
       Then the dashboard has a row with zone 230, start 09:15, end 09:20 and 1 trip requested
 
   @RF010
-  Rule: Every trip request is counted exactly once, even when the stream delivers its event twice
+  Rule: The system shall count every trip request exactly once, even when the stream delivers its event twice
 
     Example: One request delivered twice
       Given only these trip requests are received:
@@ -76,7 +76,7 @@ Feature: Trips requested in each zone
     # Question (Q010): does a trip that the rider cancels still count as requested?
 
   @RF020
-  Rule: A zone and period without events is shown as no data, not as 0 trips
+  Rule: The system shall show a zone and period without events as no data, not as 0 trips
 
     Example: Zone without a request in one period
       Given only these trip requests are received:
@@ -97,7 +97,7 @@ Feature: Trips requested in each zone
       And zones 48, 161 and 230 show 244, 191 and 342 trips requested between 09:00 and 10:00
 
   @RF040 @live
-  Rule: The count by zone over 30 days stays fast while the stream adds a small file to raw/ every minute
+  Rule: The system shall keep the count by zone over 30 days fast while the stream adds a small file to raw/ every minute
     The count is trips requested in each pickup zone from 2026-10-24 to 2026-11-22, read from the compacted files.
 
     Example: Thirty days of small files, compacted

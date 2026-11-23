@@ -6,7 +6,7 @@ Feature: One driver for each trip
   An accept is one request to our API. A simulated data set is named by its id and described in the same section.
 
   @R070
-  Rule: When a driver accepts a trip that is requested and not assigned, the trip is assigned to that driver
+  Rule: When a driver accepts a trip that is requested and not assigned, the system shall assign the trip to that driver
 
     Example: One driver accepts
       Given only these trip requests are received:
@@ -18,7 +18,7 @@ Feature: One driver for each trip
       Then by 2026-11-23T09:20:06Z driver d-0046 has the answer that the trip is assigned to them
 
   @R080 @RF030
-  Rule: If a driver accepts a trip that is already assigned, the accept is refused and the trip stays with its driver
+  Rule: If a driver accepts a trip that is already assigned, then the system shall refuse the accept and leave the trip with its driver
 
     Example: Two drivers accept at the same time
       Given only these trip requests are received:
@@ -53,7 +53,7 @@ Feature: One driver for each trip
     # Question (Q020): which driver gets the trip when two accept at the same moment?
 
   @R090
-  Rule: While a trip is assigned and not completed, the rider is shown the trip's driver
+  Rule: While a trip is assigned and not completed, the system shall show the rider the trip's driver
 
     Example: Rider looks after the accept
       Given only these trip requests are received:
@@ -66,7 +66,7 @@ Feature: One driver for each trip
       Then the rider is shown driver d-0046
 
   @R100
-  Rule: When a trip is completed, the rider is shown the fare
+  Rule: When a trip is completed, the system shall show the rider the fare
 
     Example: Rider looks after the trip is completed
       Given only these trip requests are received:
