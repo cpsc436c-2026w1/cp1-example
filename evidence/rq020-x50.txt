@@ -1,0 +1,9 @@
+replayed 2332 deliveries (0 failed) in 85 s
+every request counted 0.2 s after the last send
+replay rq020-x50: 2332 deliveries in 1774 PutRecords calls, 85 s at 50 times SIM01's speed; 837 of 837 requests counted
+R010 data latency, zone and period (36): median 0.60 s, p95 0.70 s, max 0.70 s (36)
+R020 data latency, late requests: median 0.52 s, p95 1.04 s, max 1.04 s (2)
+each request, sent to counted: median 0.70 s, p95 1.00 s, max 1.10 s (837)
+  sent to in the stream: median 0.01 s, p95 0.01 s, max 0.04 s (837)
+  in the stream to counted: median 0.70 s, p95 1.00 s, max 1.10 s (837)
+trips 09:00 to 10:00, zones 48, 161, 230: 304, 191, 342 (truth 304, 191, 342): match

@@ -1,0 +1,26 @@
+# each service asked for the slice's resources, by itself, after the last teardown (2026-11-26T07:17:17Z)
+$ aws kinesis list-streams --query "StreamNames[?starts_with(@, 't00-')]"
+[]
+$ aws kinesis describe-stream-summary --stream-name t00-trip-events
+
+aws: [ERROR]: An error occurred (ResourceNotFoundException) when calling the DescribeStreamSummary operation: Stream t00-trip-events under account <account> not found.
+$ aws lambda list-functions --query "Functions[?starts_with(FunctionName, 't00-')].FunctionName"
+[]
+$ aws lambda list-event-source-mappings --query "EventSourceMappings[?contains(FunctionArn, ':function:t00-')].UUID"
+[]
+$ aws lambda get-function --function-name t00-count-requests
+
+aws: [ERROR]: An error occurred (ResourceNotFoundException) when calling the GetFunction operation: Function not found: arn:aws:lambda:ca-central-1:<account>:function:t00-count-requests
+
+Additional error details:
+Type: User
+$ aws dynamodb list-tables --query "TableNames[?starts_with(@, 't00-')]"
+[]
+$ aws dynamodb describe-table --table-name t00-zone-counts
+
+aws: [ERROR]: An error occurred (ResourceNotFoundException) when calling the DescribeTable operation: Requested resource not found: Table: t00-zone-counts not found
+$ aws dynamodb describe-table --table-name t00-seen-events
+
+aws: [ERROR]: An error occurred (ResourceNotFoundException) when calling the DescribeTable operation: Requested resource not found: Table: t00-seen-events not found
+$ aws logs describe-log-groups --log-group-name-prefix /aws/lambda/t00-
+[]

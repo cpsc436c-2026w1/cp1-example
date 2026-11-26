@@ -1,0 +1,10 @@
+{
+  "calls": 1774,
+  "failed": 0,
+  "late_s": 0.003,
+  "run_id": "rq020-x1",
+  "seconds": 4225.04,
+  "sent": 2332,
+  "speed": 1.0,
+  "target": "kinesis:t00-trip-events"
+}

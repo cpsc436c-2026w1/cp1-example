@@ -106,6 +106,88 @@ Outside our system. We do not create these; our system relies on what the last c
 | the rider's page, the analyst's browser and the support agent's page | reads and rider messages | API `t00-api` | none |
 | the course LLM gateway | the model's reply to each message | function `t00-assistant` | the team's keys share one pool of 7.25 CAD (5 USD); 120 requests a minute per key |
 
+## Cost
+
+RQ010 (PR #7): one year of the system, in CAD, at the course price sheet's rates (ca-central-1, 2026-11-18; 1.45 CAD a
+USD, the rate the sheet uses), the free tier left out. `uv run python scripts/year_cost.py` writes the table.
+
+**Volume.** DS01 has 6,045,943 completed trips in March 2024 (*measured*, Data), 195,030 a day; with one request for
+each completed trip (Q050, *assumed*) that is 71.2 million requests a year and, with three events a trip, 213.6
+million events on the stream, about 6.8 a second.
+
+**Units of work.** For the deployed counting path the units come from the run on AWS (`evidence/units.json`,
+`scripts/run_units.py`): a counted request uses 4 DynamoDB write units (a transaction of 2 items, 2 units each); a run
+of the function is billed 9.3 ms plus 8.8 ms for each record (fitted on the replays at 10 and 50 times SIM01's speed);
+a run logs 444 bytes. Lambda reads a shard about once a second ([Lambda and Kinesis, polling and batching
+streams](https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html)), so at 6.8 events a second we count one run
+a second. For the parts not built yet, the units are *assumed*, row by row.
+
+| Part | Units a year | Rate (USD) | USD a year | Where the units come from |
+|---|---|---|---|---|
+| **Counting path, deployed** (units measured on AWS) | | | | |
+| Kinesis stream, 1 shard | 8,760.00 shard-hours | 0.0165 per shard-hour | 144.54 | 1 shard for the whole year |
+| Kinesis PUT payload units | 213.56 million units | 0.0154 per million | 3.29 | 3 events a trip, each under 25 KB |
+| Lambda requests | 31.54 million runs | 0.2 per million | 6.31 | assumed: one run a second (Lambda polls a shard once a second) at 6.8 events a second |
+| Lambda duration, arm64, 128 MB | 271,852.35 GB-seconds | 0.0000133334 per GB-second | 3.62 | measured: 9.3 ms a run + 8.8 ms a record = 69 ms |
+| DynamoDB writes, counting | 284.74 million write units | 0.6875 per million | 195.76 | measured: 4 write units a request (a transaction of 2 items) |
+| CloudWatch Logs, counting function | 14.00 GB | 0.55 per GB | 7.70 | measured: 444 bytes a run |
+| **The rest of the design, not built yet** (units assumed) | | | | |
+| Athena, the 30-day count | 0.91 TB scanned | 5.5 per TB | 5.02 | assumed: 50 queries a day, 50 MB each |
+| Firehose to the lake | 53.39 GB | 0.032 per GB | 1.71 | assumed: 250 bytes an event |
+| S3 storage, raw and compacted | 320.34 GB-months | 0.025 per GB-month | 8.01 | assumed: half a year's events on average |
+| S3 PUTs from Firehose | 525.60 thousand requests | 0.0055 per thousand | 2.89 | one file a minute |
+| Glue jobs, compaction and curation | 121.67 DPU-hours | 0.308 per DPU-hour | 37.47 | assumed: 2 jobs a night, 2 DPUs, 5 minutes |
+| DynamoDB writes, trips | 142.37 million write units | 0.6875 per million | 97.88 | assumed: 2 writes a trip (assign, complete) |
+| API Gateway HTTP API | 142.37 million requests | 1.11 per million | 158.03 | assumed: an accept and a rider's read a trip |
+| Lambda requests, assign and read functions | 142.37 million runs | 0.2 per million | 28.47 | assumed: one run for each API request |
+| Lambda duration, assign and read functions | 889,826.29 GB-seconds | 0.0000133334 per GB-second | 11.86 | assumed: 50 ms at 128 MB a run |
+| Course LLM gateway, the assistant | 0.07 million requests | 44.1379 per million | 3.22 | assumed (Q040): 200 messages a day, 600 input and 20 output tokens each, qwen3.8-27b at 0.10 and 0.20 CAD per million tokens |
+
+**One year: about 524 CAD for the counting path, and 1,038 CAD for the whole design** (361 and 716 USD). The largest
+lines are the counting path's DynamoDB writes (195.76 USD), doubled by the transaction of [review](reviews/well-architected.md) question
+1, the API's requests (158.03 USD, assumed) and the stream's shard (144.54 USD), billed every hour of the year.
+Without the transaction the counting writes would cost half as much (2 units a request), with the risk that question
+describes.
+
+**The run of 2026-11-26** (`evidence/units.json`): the stream existed 1.45 hours in all (05:50 to 07:15 and 07:15 to
+07:17 UTC, the second time for the redeploy of step 6.4 of the page); 11,499 records went into it, the function ran
+2,116 times for 135.2 billed seconds at 128 MB, the two tables used 20,156 write and 22,527 read units (the examples'
+and the replays' reads and clears included), and the log group received 0.94 MB. At the price sheet's rates that is
+**0.0422 USD = 0.0612 CAD**: the shard 0.0239, the writes 0.0139, the reads 0.0031, everything else 0.0013 USD
+(`evidence/units.txt`, `evidence/units-recost.txt`). The few records of the redeploy's one example came after the
+units were read and are not in them. Cost Explorer was not read: the bill of the course staff's account holds other
+work, and the price sheet asks for the cost from the units.
+
+## Experiments
+
+RQ020 (PR #7): R010's data latency against the replay speed. `sim/replay_test.py` replays SIM01's deliveries received
+up to 10:11 (2,332 of its 2,515; every request and both late ones) through the deployed slice, at 1, 10 and 50 times
+SIM01's speed, with the course replayer (`sim/replay.py`). Each run starts from empty tables and waits until every
+request is counted. R010's data latency of a zone and period is the time from the moment the replay reaches the
+period's end to the moment the stored count holds every request received by then (0 when it held them before the end);
+R020's, from the moment a late request was sent to its corrected count. Run on 2026-11-26, one run at each speed; the
+files are in `evidence/rq020-x1/`, `rq020-x10/` and `rq020-x50/` (`report.json`, and `seen.jsonl` with the two times
+of each request).
+
+| Speed (times SIM01's) | Replay | Deliveries | R010 data latency, 36 zones and periods: median / p95 / max (s) | R020, the 2 late requests: median / p95 / max (s) | Each request, sent to counted: median / p95 / max (s) | Function runs, records a run | Billed ms a run | Trips 09:00 to 10:00, zones 48, 161, 230 (truth 304, 191, 342) |
+|---|---|---|---|---|---|---|---|---|
+| 1 | 70.4 min | 2332 | 0.00 / 0.91 / 1.94 | 0.85 / 1.05 / 1.05 | 0.94 / 1.96 / 2.04 | 1556, 1.5 | 19 | 304, 191, 342 (match) |
+| 10 | 7.0 min | 2332 | 0.00 / 0.98 / 1.01 | 0.39 / 0.55 / 0.55 | 0.66 / 1.09 / 1.94 | 420, 5.5 | 58 | 304, 191, 342 (match) |
+| 50 | 1.4 min | 2332 | 0.60 / 0.70 / 0.70 | 0.52 / 1.04 / 1.04 | 0.70 / 1.00 / 1.10 | 86, 27.1 | 248 | 304, 191, 342 (match) |
+
+**Result.** R010's data latency stays under 1 s at p95 at all three speeds (0.91, 0.98 and 0.70 s at 1, 10 and 50
+times the speed), far inside its target of 60 s, and the counts match SIM01's truth at each speed. The latency does
+not grow with the speed because Lambda reads the shard about once a second ([Lambda and
+Kinesis](https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html)): a request waits for the next read and one
+batch, whatever the rate. What grows is the batch: 1.5 records a run at 1 times the speed, 5.5 at 10 and 27.1 at 50. A
+run takes about 9 ms plus 8.8 ms a record, so, estimated from that fit and not measured, one shard read by one run at
+a time keeps up to about 112 records a second, 204 times SIM01's speed and 17 times the rate of the whole DS01 subset
+(6.8 events a second); above that, the latency would grow with the backlog. At 50 times the speed the median is higher
+than at 1 and 10 times because a period's last request arrives a fraction of a second before the period ends, so its
+count is stored just after the end. Observed once, not explained by these runs: the first batch after the deploy took
+28 s from the stream to the count (`evidence/first-batch.txt`); in the replays every request was counted within 2.1 s
+of being sent.
+
 ## Data
 
 ### Our data
