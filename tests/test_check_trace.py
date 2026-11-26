@@ -61,9 +61,6 @@ PLANTED = [
     ("rule 7: a data set built from a source that is not defined", DESIGN,
      "in SIM01's hour from DS01, at", "in SIM01's hour from DS05, at",
      "SIM03 is built from DS05"),
-    ("rule 7: a data set that names no source", DESIGN,
-     "in SIM01's hour from DS01, at", "in SIM01's hour, at",
-     "SIM03 does not name a DS"),
 ]
 
 
@@ -190,3 +187,10 @@ def test_an_unclosed_docstring_is_reported(copy):
     change(copy, COUNTS, "      Given ", '      """\n      Given ')
     result = run(copy)
     assert "docstring is not closed" in result.stdout, result.stdout
+
+
+def test_a_data_set_that_names_no_source_is_not_a_problem(copy):
+    """Simulated data can be made up: the Checkpoint 1 page asks for no source."""
+    change(copy, DESIGN, "in SIM01's hour from DS01, at", "in SIM01's hour, at")
+    result = run(copy)
+    assert "does not name a DS" not in result.stdout and "SIM03 is built from" not in result.stdout, result.stdout

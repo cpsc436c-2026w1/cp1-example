@@ -101,7 +101,7 @@
 - The counting function logs one line of counts for each batch, not one for each record
   (`src/rides/count_function.py:91`); measured: 444 bytes a run (`evidence/units.json`).
 - The largest yearly line of the design is the counting path's DynamoDB writes: 4 write units a request, a
-  transaction of 2 items (`docs/design.md`, Cost; `docs/review.md`, question 1). It is not the Problem about loading
+  transaction of 2 items (`docs/design.md`, Cost; `docs/reviews/well-architected.md`, question 1). It is not the Problem about loading
   a history row by row: each write is a new request from the stream.
 - The first run on AWS sent one batch of 4 records before the replays (`evidence/first-batch.txt`).
 
