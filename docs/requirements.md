@@ -47,7 +47,7 @@ From the proposal feedback issue, with its IDs and wording.
 - **RF020** A zone and period without events must be shown as no data, not as 0 trips: an empty period and a broken feed look the same. Reply: a count is stored only for a zone with a request in the period, and every other zone and period is shown as `no data`; the RF020 rule checks what is shown. [Scenario](../features/js01_trips_per_zone.feature)
 - **RF030** Say what happens when two drivers accept the same trip at the same moment, and show it. Reply [R080]: the write that assigns a trip has a condition: the trip is not assigned yet. [Scenario](../features/trip_assignment.feature)
 - **RF040** The count by zone over 30 days must stay fast while the stream adds a small file to `raw/` every minute. Reply: a nightly job compacts each day of `raw/trip-events/` into one file, and the count reads those files; response time under 5 s at p50, from the start of the count query to its result (SLO), run on AWS. [Scenario](../features/js01_trips_per_zone.feature)
-- **RF050** Every AWS resource carries the course tags. Reply: each script in `scripts/` tags what it creates. Read at Checkpoint 2: `scripts/` and the tags on the resources.
+- **RF050** Every AWS resource carries the course tags. Reply: each script in `scripts/` tags what it creates with `Project=436c`, `Team=t00` and `Owner=course` (`scripts/common.py`, with the recipe helper `scripts/tags.py`), and every name starts with `t00-`. Read: `scripts/`, and `evidence/deploy-tags.txt`, the tags AWS returned for each resource of the slice on 2026-11-26. (PR #3)
 - **RQ010** Choose a meaningful long-term horizon for your system, for example 3 months, 6 months or a year, and calculate what your cloud architecture costs to run over it, in CAD, using the course price sheet. Reply: We will calculate the cost of one year in CAD, based on the completed trips a day in DS01 (*measured*), one request for each of them (*assumed*, Q050) and the course price sheet: processing the stream in Lambda, DynamoDB write units, and the Athena data scanned for the counts. Read at Checkpoint 2: `docs/design.md`, section Cost.
 - **RQ020** Analyze your data latency against changes in your replay speed. Reply: We will write the test that replays SIM01 at 1, 10 and 50 times its speed and checks R010's data latency at each speed. Read at Checkpoint 2: `docs/design.md`, section Experiments, with the test's results.
 
@@ -69,3 +69,7 @@ From the proposal feedback issue, with its IDs and wording.
 | Q030 | Can the app send an event again more than 24 hours after it first sent it? | the app's team | no: the app's retries end within minutes | RF010 |
 | Q040 | How many messages do riders send to support a day? | the support team's lead | about 200 | R110 |
 | Q050 | How many trip requests are there for each completed trip? DS01 has only completed trips | the operations analyst | one request for each completed trip | JS01, R010, RQ010 |
+
+## Decisions
+
+- Decision (budget-check BC010, t00-trip-events, PR #3): keep. The stream is the one resource of the slice that bills by the hour (0.0165 USD, 11.88 for 30 days); scripts/stream.py up creates it for a run or a demo, scripts/teardown.sh deletes it first, and nothing is kept between runs (docs/design.md, Resources).

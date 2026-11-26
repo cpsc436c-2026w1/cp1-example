@@ -1,0 +1,41 @@
+# Tags on the slice's resources, as AWS returns them (2026-11-26T06:01:28Z); the account number is written <account>
+## kinesis list-tags-for-stream --stream-name t00-trip-events
+Owner	course
+Project	436c
+Team	t00
+## dynamodb list-tags-of-resource t00-zone-counts
+Project	436c
+Owner	course
+Team	t00
+## dynamodb list-tags-of-resource t00-seen-events
+Project	436c
+Owner	course
+Team	t00
+## lambda list-tags t00-count-requests
+Owner	course
+Project	436c
+Team	t00
+## lambda list-tags event source mapping
+Owner	course
+Project	436c
+Team	t00
+## logs list-tags-for-resource /aws/lambda/t00-count-requests
+Owner	course
+Project	436c
+Team	t00
+## lambda get-function-concurrency t00-count-requests
+1
+## lambda get-event-source-mapping (settings)
+{
+    "BatchSize": 100,
+    "Window": 1,
+    "Parallel": 1,
+    "Retries": 3,
+    "MaxAge": 3600,
+    "Bisect": true,
+    "Responses": [
+        "ReportBatchItemFailures"
+    ],
+    "Start": "TRIM_HORIZON",
+    "State": "Enabled"
+}
