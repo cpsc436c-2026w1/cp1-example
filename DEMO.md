@@ -1,12 +1,15 @@
 # Studio demo: the rides example, file by file
 
 About one minute a step. Steps 1 to 8 are Checkpoint 1: **text that a team writes by Tuesday**, and the two checks
-of that text. Steps 9 to 13 show **where Checkpoint 2 goes**: the same text made to run. Nothing calls AWS.
-All output below is pasted from runs in this repository on 2026-11-20.
+of that text (tag `cp1`; output pasted from runs on 2026-11-20). Steps 9 to 16 are Checkpoint 2: **the same text,
+running**, with JS01's counting path deployed on AWS (tag `cp2`; output pasted from runs on 2026-11-26).
 
 Before the studio: `uv` installed; `uv sync` once in this folder.
 
 ## Checkpoint 1: what a team writes for Tuesday
+
+Steps 1 to 8 show the files at tag `cp1` (`git checkout cp1`; `git checkout cp2` comes back): the README, the
+docs and the feature files have changed since.
 
 | # | Show | Say |
 |---|---|---|
@@ -95,119 +98,311 @@ scenarios (18 error and 4 untested, 22) equals the number of `Example:` lines.
 
 ## Checkpoint 2: the same text, running
 
+Tag `cp2`. Every rule has step code and every example runs; JS01's counting path ran on AWS on 2026-11-26 (account
+of the course staff, ca-central-1, the team prefix `t00`) and was deleted after the run. The numbers on the circled
+steps are those of the Checkpoint 2 page.
+
 | # | Show | Say |
 |---|---|---|
-| 9 | `sim/datasets.py` beside Data, Simulated data for the demos; run the generator | the bullets became settings; the id is the folder name; the folders are those of `raw/trip-events/` |
-| 10 | run `@RF010`; ask for a prediction; run it with `DEDUPE=off` | the example knew its answer before the system ran; with the check off the count is 3, not 2, and the simulated hour with its 4 duplicates fails too: zone 48 counts 307, not 304, because 3 of the 4 are in zone 48 |
-| 11 | run `@RF020` and `@RF030` | a zone without events is `no data`; two accepts, each sent before the other has an answer: the conditional write gives the trip to one driver and refuses the other; an accept of a trip that is already assigned is refused and the trip keeps its driver |
-| 12 | run `features/js04_pickup_place.feature`; then `check.py` alone | the gate reads the eval's counts from its steps: 10 cases, 3 runs each, at least 24 of 30 correct. Checker only, recorded replies: the replies are examples written by hand, so a pass shows that the checker and the gate work, not that the model meets R110; that waits for a live run through the course LLM gateway, which is not written yet. R120's example is undefined: it is a draft |
-| 13 | `uv run pytest -q` | the generator's seed, the local code (with the two accepts without the condition: both drivers are told assigned), the checker with a planted error for each rule, the eval's checker |
+| 9 | ① `docs/design.md`, Simulated data for the demos, beside `sim/datasets.py` and `sim/expected.toml`; run the generator, then `sim/check.py` | each bullet became settings, and each number of the bullet a query on the files; the checker fails when a number in the bullet and the files differ. `sim/data/SIM01/` is what the system receives, `_truth/` beside it the events as they happened and the faults. SIM05 (42,797 files) is written on demand and not committed |
+| 10 | ② `uvx behave@1.3.3`, then the two tag runs | every example runs on the local code, with behave alone (no AWS, no Pydantic). One example is tagged `@todo`: RF040's, whose lake is not deployed; it runs on the local stand-in |
+| 11 | ② `@RF010` with `DEDUPE=off`, after a prediction | as at Checkpoint 1: the example knew its answer before the system ran |
+| 12 | ③ `docs/design.md`, Resources; `scripts/stream.py up`, `scripts/counting.py up`; the first batch | the first six rows are deployed, each from a script that is safe to run again, with the course tags; the first batch of 4 records (one twice) took 28 s, observed once, after the deploy; a second run of both scripts keeps or updates each resource |
+| 13 | ③ the JS01 counting examples against the deployed slice | the same examples, `TARGET=aws`: the `Given` rows go to the Kinesis stream, the function counts them in DynamoDB, the `Then` reads the table |
+| 14 | ④ `docs/requirements.md`, RQ010 and RQ020; `docs/design.md`, Cost and Experiments; the replay test | RQ020: R010's data latency stays about 1 s at p95 at 1, 10 and 50 times SIM01's speed: the function reads the shard about once a second, whatever the rate. RQ010: one year in CAD, from DS01's volume and the units the run measured |
+| 15 | ⑤ `docs/reviews/well-architected.md` | four questions of the Data Analytics Lens; questions 1 and 2 changed the design (a transaction and batch item failures; a provisioned shard), and `docs/design.md` shows both |
+| 16 | ⑥ the checks, the decisions, the teardown | `check_trace.py` lists the two decisions; `teardown.sh --yes` deletes the stream first, then asks each service again |
 
 Step 9:
 
 ```
 $ uv run python -m sim.generate
-SIM01 rush-hour: 2511 events, 2515 deliveries, 6 fault records (duplicate, late) -> sim/data/SIM01/
-SIM02 quiet-zone: 2331 events, 2331 deliveries, 1 fault records (quiet) -> sim/data/SIM02/
-SIM03 double-accept: 60 events, 60 deliveries, 10 fault records (later-first) -> sim/data/SIM03/
-$ find sim/data/SIM01 -name "*.jsonl" | sort
-sim/data/SIM01/_truth/events.jsonl
-sim/data/SIM01/_truth/faults.jsonl
-sim/data/SIM01/trip-events/dt=2026-11-23/hour=09/deliveries.jsonl
-sim/data/SIM01/trip-events/dt=2026-11-23/hour=10/deliveries.jsonl
-sim/data/SIM01/trip-events/dt=2026-11-23/hour=11/deliveries.jsonl
+SIM01 rush-hour: 2511 events, 2515 deliveries in 3 files, 6 fault records (duplicate, late), 5026 lines valid -> sim/data/SIM01/
+SIM02 quiet-zone: 2331 events, 2331 deliveries in 3 files, 1 fault records (quiet), 4662 lines valid -> sim/data/SIM02/
+SIM03 double-accept: 60 events, 60 deliveries in 1 file, 10 fault records (later-first), 120 lines valid -> sim/data/SIM03/
+SIM04 trips-day: 19074 events, 19077 deliveries in 1 file, 3 fault records (bad-fare), 38151 lines valid -> sim/data/SIM04/
+$ uv run python sim/check.py SIM01
+SIM01: sim/data/SIM01/ (models: trip_accepted, trip_completed, trip_requested, ExportRow)
+ok   JSON: every line is one JSON object
+ok   folders: 1 source (trip-events), 3 files, every line in the folder of its received_time
+ok   validate: 2515 delivery lines and 2511 truth events match their models
+ok   truth: each of 2511 event_ids once, every delivery is in it
+ok   bullet: 6 numbers of the bullet, each given by the files
+ok   duplicate: 4 records, each event delivered once more
+ok   never: none
+ok   received after event: every delivery has received_time >= event_time
+ok   late: 2 events first delivered 391 s to 405 s after event_time; every other event within 1 s
+ok   changed: none: every delivery equals its truth event
+ok   quiet: none
+ok   later-first: none
+ok   bad-fare: none
+ok   lines: 2515 = 2511 truth - 0 never + 4 duplicate
+--   other fault kinds, not checked here: none
+OK: SIM01 matches its bullet and the simulation standards (0 problems)
+digest 0f2e3a9c5894127e
+$ uv run python sim/check.py                       # every data set: the last two lines of each
+OK: SIM01 matches its bullet and the simulation standards (0 problems)
+digest 0f2e3a9c5894127e
+OK: SIM02 matches its bullet and the simulation standards (0 problems)
+digest c643744177fdae18
+OK: SIM03 matches its bullet and the simulation standards (0 problems)
+digest f1d42a916abdcee2
+OK: SIM04 matches its bullet and the simulation standards (0 problems)
+digest e07316a76c4bc103
+OK: SIM05 matches its bullet and the simulation standards (0 problems)
+digest fbe867552c4a5020
 ```
 
-Step 10:
+The number 191 changed to 192 in SIM01's bullet (a copy of `docs/design.md`), then put back:
 
 ```
-$ uv run behave --tags=@RF010
-USING RUNNER: behave.runner:Runner
-@JS01
-Feature: Trips requested in each zone # features/js01_trips_per_zone.feature:2
-  Covers the first part of JS01 (operations analyst): the number of trips requested in each pickup zone for each
-  5-minute period. A period holds the requests with an event time from its start up to, and not including, its end.
-  A table holds the only events of its example. Its columns are event fields listed in docs/design.md,
-  section Data. A simulated data set is named by its id and described in the same section, under Simulated data
-  for the demos.
-    Example: One request delivered twice                            # features/js01_trips_per_zone.feature:60
-      Given only these trip requests are received:                  # features/steps/data_steps.py:7
-        | event_id  | trip_id | pickup_zone_id | event_time           | received_time        |
-        | ev-000101 | t-0101  | 161            | 2026-11-23T09:11:00Z | 2026-11-23T09:11:01Z |
-        | ev-000102 | t-0102  | 161            | 2026-11-23T09:12:30Z | 2026-11-23T09:12:31Z |
-        | ev-000101 | t-0101  | 161            | 2026-11-23T09:11:00Z | 2026-11-23T09:12:40Z |
-      When the counts are read at 2026-11-23T09:15:30Z              # features/steps/count_steps.py:24
-      Then zone 161 shows 2 trips requested between 09:10 and 09:15 # features/steps/count_steps.py:29
+$ uv run python sim/check.py SIM01 --design /tmp/design-planted.md      # from the problem on
+PROBLEM bullet: 1
+  expected.toml: "304, 191 and 342 trips" is not in the bullet of SIM01
+FAILED: SIM01 has 1 problems
+```
 
-    Example: One simulated hour with 4 requests delivered twice                                # features/js01_trips_per_zone.feature:69
-      Given the simulated data set SIM01 "rush-hour"                                           # features/steps/data_steps.py:22
-      When the counts are read at 2026-11-23T10:11:00Z                                         # features/steps/count_steps.py:24
-      Then zones 48, 161 and 230 show 304, 191 and 342 trips requested between 09:00 and 10:00 # features/steps/count_steps.py:43
+Step 10 (last lines of each; a fresh clone takes about 40 s the first time, to write SIM05):
 
+```
+$ uvx behave@1.3.3
+4 features passed, 0 failed, 0 skipped
+14 rules passed, 0 failed, 0 skipped
+22 scenarios passed, 0 failed, 0 skipped
+84 steps passed, 0 failed, 0 skipped
+Took 0min 0.000s
+$ uvx behave@1.3.3 --tags="not @todo"
+4 features passed, 0 failed, 0 skipped
+13 rules passed, 0 failed, 1 skipped
+21 scenarios passed, 0 failed, 1 skipped
+77 steps passed, 0 failed, 7 skipped
+Took 0min 0.000s
+$ uvx behave@1.3.3 --tags=@todo
 1 feature passed, 0 failed, 3 skipped
 1 rule passed, 0 failed, 13 skipped
-2 scenarios passed, 0 failed, 20 skipped
-6 steps passed, 0 failed, 78 skipped
+1 scenario passed, 0 failed, 21 skipped
+7 steps passed, 0 failed, 77 skipped
 Took 0min 0.000s
+$ uvx behave@1.3.3 --dry-run --tags="not @todo"; echo $?
+0 features passed, 0 failed, 0 skipped, 4 untested
+0 rules passed, 0 failed, 1 skipped, 13 untested
+0 scenarios passed, 0 failed, 1 skipped, 21 untested
+0 steps passed, 0 failed, 7 skipped, 77 untested
+Took 0min 0.000s
+0
 ```
 
-Prediction: the first example's table has 3 rows and 2 different `event_id`. What does the system count for zone
-161 between 09:10 and 09:15 when the duplicate check is off?
+Step 11:
 
 ```
-$ DEDUPE=off uv run behave --tags=@RF010          # from the first failure on
-      Then zone 161 shows 2 trips requested between 09:10 and 09:15 # features/steps/count_steps.py:29
+$ DEDUPE=off uvx behave@1.3.3 --tags=@RF010        # the two failures
       ASSERT FAILED: zone 161, between 09:10 and 09:15: expected 2 trips requested, the system counted 3 (DEDUPE=off: the duplicate check is off)
-
-
-    Example: One simulated hour with 4 requests delivered twice                                # features/js01_trips_per_zone.feature:69
-      Given the simulated data set SIM01 "rush-hour"                                           # features/steps/data_steps.py:22
-      When the counts are read at 2026-11-23T10:11:00Z                                         # features/steps/count_steps.py:24
-      Then zones 48, 161 and 230 show 304, 191 and 342 trips requested between 09:00 and 10:00 # features/steps/count_steps.py:43
       ASSERT FAILED: zone 48, between 09:00 and 10:00: expected 304 trips requested, the system counted 307 (DEDUPE=off: the duplicate check is off)
-
-
-
-Failing scenarios:
-  features/js01_trips_per_zone.feature:60  One request delivered twice
-  features/js01_trips_per_zone.feature:69  One simulated hour with 4 requests delivered twice
-
-0 features passed, 1 failed, 3 skipped
-0 rules passed, 1 failed, 13 skipped
-0 scenarios passed, 2 failed, 20 skipped
-4 steps passed, 2 failed, 78 skipped
-Took 0min 0.000s
 ```
 
-Step 11 (last lines of each):
+Step 12 (`evidence/deploy.txt`, `evidence/first-batch.txt`, `evidence/rerun-up.txt`, `evidence/teardown-dry-run.txt`):
 
 ```
-$ uv run behave --tags=@RF020
-1 feature passed, 0 failed, 3 skipped
-1 rule passed, 0 failed, 13 skipped
-2 scenarios passed, 0 failed, 20 skipped
-10 steps passed, 0 failed, 74 skipped
-Took 0min 0.000s
-$ uv run behave --tags=@RF030
-1 feature passed, 0 failed, 3 skipped
-1 rule passed, 0 failed, 13 skipped
-3 scenarios passed, 0 failed, 19 skipped
-13 steps passed, 0 failed, 71 skipped
-Took 0min 0.000s
+$ uv run python scripts/stream.py up && uv run python scripts/counting.py up
+created stream t00-trip-events (1 shard, provisioned)
+t00-trip-events ready
+created table t00-zone-counts
+created table t00-seen-events
+created function t00-count-requests
+created mapping t00-trip-events -> t00-count-requests
+counting path ready
+# the first batch, sent by a few lines of Python with src/rides/aws_slice.py: R010's 3 rows and one of them again
+first batch: 4 records (one sent twice), all counted 28.3 s after the put
+$ uv run python scripts/stream.py up && uv run python scripts/counting.py up       # again, on the deployed slice
+stream t00-trip-events is there (ACTIVE): kept
+t00-trip-events ready
+table t00-zone-counts is there (ACTIVE): kept
+table t00-seen-events is there (ACTIVE): kept
+function t00-count-requests is there: code and settings updated
+reserved concurrency 1 on t00-count-requests
+mapping t00-trip-events -> t00-count-requests is there: settings updated
+counting path ready
+$ bash scripts/teardown.sh --dry-run               # with the slice deployed
+would delete  Kinesis stream t00-trip-events (hourly)
+would delete  event source mapping fd4c6e2f-7fb5-4bea-b6a8-1e093199fbf7 (t00-trip-events -> t00-count-requests)
+would delete  Lambda function t00-count-requests
+would delete  DynamoDB table t00-zone-counts
+would delete  DynamoDB table t00-seen-events
+would delete  log group /aws/lambda/t00-count-requests
+dry run: nothing deleted (bash scripts/teardown.sh --yes deletes)
 ```
-
-Step 12: see `evals/pickup_place/README.md` for the output, with a forced failure.
 
 Step 13:
 
 ```
-$ uv run pytest -q
-.....................................                                    [100%]
-37 passed in 2.01s
+$ TARGET=aws uv run behave features/js01_trips_per_zone.feature --tags="not @todo"     # last lines
+1 feature passed, 0 failed, 0 skipped
+5 rules passed, 0 failed, 1 skipped
+9 scenarios passed, 0 failed, 1 skipped
+32 steps passed, 0 failed, 7 skipped
+Took 0min 0.000s
+exit 0
 ```
+
+Step 14, the replay test (each run empties the tables, replays SIM01's deliveries received up to 10:11, waits until
+every request is counted, and compares the counts with the truth):
+
+```
+$ uv run python sim/replay_test.py --speed 50
+replayed 2332 deliveries (0 failed) in 85 s
+every request counted 0.2 s after the last send
+replay rq020-x50: 2332 deliveries in 1774 PutRecords calls, 85 s at 50 times SIM01's speed; 837 of 837 requests counted
+R010 data latency, zone and period (36): median 0.60 s, p95 0.70 s, max 0.70 s (36)
+R020 data latency, late requests: median 0.52 s, p95 1.04 s, max 1.04 s (2)
+each request, sent to counted: median 0.70 s, p95 1.00 s, max 1.10 s (837)
+  sent to in the stream: median 0.01 s, p95 0.01 s, max 0.04 s (837)
+  in the stream to counted: median 0.70 s, p95 1.00 s, max 1.10 s (837)
+trips 09:00 to 10:00, zones 48, 161, 230: 304, 191, 342 (truth 304, 191, 342): match
+$ uv run python sim/replay_test.py --speed 10
+replayed 2332 deliveries (0 failed) in 423 s
+every request counted 0.2 s after the last send
+replay rq020-x10: 2332 deliveries in 1774 PutRecords calls, 423 s at 10 times SIM01's speed; 837 of 837 requests counted
+R010 data latency, zone and period (36): median 0.00 s, p95 0.98 s, max 1.01 s (36)
+R020 data latency, late requests: median 0.39 s, p95 0.55 s, max 0.55 s (2)
+each request, sent to counted: median 0.66 s, p95 1.09 s, max 1.94 s (837)
+  sent to in the stream: median 0.01 s, p95 0.01 s, max 0.04 s (837)
+  in the stream to counted: median 0.66 s, p95 1.09 s, max 1.90 s (837)
+trips 09:00 to 10:00, zones 48, 161, 230: 304, 191, 342 (truth 304, 191, 342): match
+$ uv run python sim/replay_test.py --speed 1
+replayed 2332 deliveries (0 failed) in 4225 s
+every request counted 0.2 s after the last send
+replay rq020-x1: 2332 deliveries in 1774 PutRecords calls, 4225 s at 1 times SIM01's speed; 837 of 837 requests counted
+R010 data latency, zone and period (36): median 0.00 s, p95 0.91 s, max 1.94 s (36)
+R020 data latency, late requests: median 0.85 s, p95 1.05 s, max 1.05 s (2)
+each request, sent to counted: median 0.94 s, p95 1.96 s, max 2.04 s (837)
+  sent to in the stream: median 0.01 s, p95 0.01 s, max 0.04 s (837)
+  in the stream to counted: median 0.94 s, p95 1.95 s, max 2.03 s (837)
+trips 09:00 to 10:00, zones 48, 161, 230: 304, 191, 342 (truth 304, 191, 342): match
+```
+
+Then the units of the run and the year (`docs/design.md`, Cost):
+
+```
+$ uv run python scripts/run_units.py --start 2026-11-26T05:49:00Z --end 2026-11-26T07:14:18Z --stream-hours 1.6   # before the teardown
+$ uv run python scripts/run_units.py --recost --stream-hours 1.45     # after both teardowns (last lines)
+Kinesis shard-hours            0.023925 USD
+Kinesis PUT payload units      0.000177 USD
+Lambda requests                0.000423 USD
+Lambda duration (arm64)        0.000225 USD
+DynamoDB write units           0.013857 USD
+DynamoDB read units            0.003097 USD
+CloudWatch Logs ingestion      0.000517 USD
+total                            0.0422 USD = 0.0612 CAD
+$ uv run python scripts/year_cost.py               # the last three lines
+counting path: 361.22 USD = 523.77 CAD a year
+rest of the design: 354.57 USD = 514.13 CAD a year
+whole design: 715.80 USD = 1,037.91 CAD a year
+```
+
+Step 16:
+
+```
+$ python3 tools/check_trace.py                     # the decisions, then the last line
+DECISION requirements.md:50 (under RF040 (requirements.md:49)) budget-check BC020, t00-compact-events PR #4: later, fi ...
+DECISION requirements.md:76 (under ## Decisions) budget-check BC010, t00-trip-events PR #3: keep. The stream is the on ...
+29 IDs, 0 problems, 2 decisions
+$ uv run pytest -q
+72 passed in 24.69s
+$ bash scripts/teardown.sh --yes
+deleted       Kinesis stream t00-trip-events (hourly)
+deleted       event source mapping fd4c6e2f-7fb5-4bea-b6a8-1e093199fbf7 (t00-trip-events -> t00-count-requests)
+deleted       Lambda function t00-count-requests
+deleted       DynamoDB table t00-zone-counts
+deleted       DynamoDB table t00-seen-events
+deleted       log group /aws/lambda/t00-count-requests
+nothing left with the prefix t00- (Kinesis streams, Lambda functions and mappings, DynamoDB tables, log groups)
+exit 0
+```
+
+Step 6.4 of the page, deploy again, check the slice works, clean up again (`evidence/redeploy.txt`, the main lines):
+
+```
+$ uv run python scripts/stream.py up && uv run python scripts/counting.py up
+created stream t00-trip-events (1 shard, provisioned)
+counting path ready
+$ TARGET=aws uv run behave features/js01_trips_per_zone.feature --tags="not @todo" --name "One request delivered twice"    # 2026-11-26T07:15:41Z
+1 scenario passed, 0 failed, 9 skipped
+$ bash scripts/teardown.sh --yes    # 2026-11-26T07:16:55Z
+deleted       Kinesis stream t00-trip-events (hourly)
+nothing left with the prefix t00- (Kinesis streams, Lambda functions and mappings, DynamoDB tables, log groups)
+exit 0
+```
+
+Then each service asked once more, by itself (`evidence/teardown-proof.txt`):
+
+```
+# each service asked for the slice's resources, by itself, after the last teardown (2026-11-26T07:17:17Z)
+$ aws kinesis list-streams --query "StreamNames[?starts_with(@, 't00-')]"
+[]
+$ aws kinesis describe-stream-summary --stream-name t00-trip-events
+
+aws: [ERROR]: An error occurred (ResourceNotFoundException) when calling the DescribeStreamSummary operation: Stream t00-trip-events under account <account> not found.
+$ aws lambda list-functions --query "Functions[?starts_with(FunctionName, 't00-')].FunctionName"
+[]
+$ aws lambda list-event-source-mappings --query "EventSourceMappings[?contains(FunctionArn, ':function:t00-')].UUID"
+[]
+$ aws lambda get-function --function-name t00-count-requests
+
+aws: [ERROR]: An error occurred (ResourceNotFoundException) when calling the GetFunction operation: Function not found: arn:aws:lambda:ca-central-1:<account>:function:t00-count-requests
+
+Additional error details:
+Type: User
+$ aws dynamodb list-tables --query "TableNames[?starts_with(@, 't00-')]"
+[]
+$ aws dynamodb describe-table --table-name t00-zone-counts
+
+aws: [ERROR]: An error occurred (ResourceNotFoundException) when calling the DescribeTable operation: Requested resource not found: Table: t00-zone-counts not found
+$ aws dynamodb describe-table --table-name t00-seen-events
+
+aws: [ERROR]: An error occurred (ResourceNotFoundException) when calling the DescribeTable operation: Requested resource not found: Table: t00-seen-events not found
+$ aws logs describe-log-groups --log-group-name-prefix /aws/lambda/t00-
+[]
+```
+
+### The files of evidence/
+
+| File | What it is |
+|---|---|
+| `deploy.txt` | the first deploy: `scripts/stream.py up`, `scripts/counting.py up` and the status of each resource, from an earlier commit of the scripts (they set the reserved concurrency without a line of output, and the status line printed the stream's creation time in local time with a `Z`; `scripts/stream.py` prints UTC since) |
+| `deploy-tags.txt` | the tags AWS returned for each resource of the slice, the function's reserved concurrency and the mapping's settings (RF050) |
+| `first-batch.txt` | the first batch on AWS: 4 records, one of them twice, before any replay |
+| `rerun-up.txt` | both `up` scripts run again on the deployed slice: each resource kept or updated, nothing made twice |
+| `aws-examples.txt` | the JS01 counting examples run against the deployed slice (`TARGET=aws`, `--tags="not @todo"`) |
+| `rq020-x1.txt`, `rq020-x10.txt`, `rq020-x50.txt` | what `sim/replay_test.py` printed at each speed |
+| `rq020-x<speed>/command.txt`, `sent.jsonl`, `summary.json` | the replayer's record of the run: the command and commit, each delivery with the time it was sent, the summary |
+| `rq020-x<speed>/seen.jsonl`, `counts.jsonl` | the two tables after the run: each request with the time it entered the stream and was counted, each stored count |
+| `rq020-x<speed>/report.json` | R010's and R020's data latency and the counts against SIM01's truth (RQ020) |
+| `units.txt`, `units.json` | the measured units of the run from CloudWatch (records, function runs and billed time, write and read units, log bytes) and their cost |
+| `units-recost.txt` | the cost again with the stream's two lifetimes, after both teardowns (`docs/design.md`, Cost) |
+| `teardown-dry-run.txt` | `scripts/teardown.sh --dry-run` with the slice deployed: what it would delete |
+| `teardown.txt` | `scripts/teardown.sh --yes` after the run, and its last check of each service |
+| `redeploy.txt` | step 6.4 of the page: deploy again, one example on AWS, `teardown.sh --yes` again |
+| `teardown-proof.txt` | each service's own list and describe calls after the last teardown: nothing named `t00-` is left |
+
+### Pull request numbers
+
+The numbers in the decision lines and the changed lines of `docs/` are the pull requests of this repository, one for
+each change that belongs together, merged in this order:
+
+| PR | What it holds | Where `docs/` names it |
+|---|---|---|
+| [#1](https://github.com/cpsc436c-2026w1/cp1-example/pull/1) | `tools/`: the traceability check at its Checkpoint 2 version (decision lines, Stakeholder input tables, a Rule needs an Example) and the seed query of SIM04 and SIM05 | not named |
+| [#2](https://github.com/cpsc436c-2026w1/cp1-example/pull/2) | the base: the generator and the data of SIM01, SIM02 and SIM03, the step code, the local code in `src/rides/`, the dependencies | not named |
+| [#3](https://github.com/cpsc436c-2026w1/cp1-example/pull/3) | the slice: `scripts/` (stream, counting, teardown, tags), the deployed function, the examples' AWS target, Resources, RF050 | `docs/design.md`, Resources; `docs/requirements.md`, RF050 and the BC010 decision |
+| [#4](https://github.com/cpsc436c-2026w1/cp1-example/pull/4) | RF040's example tagged `@todo`, the compaction job left for the final hand-in | `docs/requirements.md`, the BC020 decision under RF040 |
+| [#5](https://github.com/cpsc436c-2026w1/cp1-example/pull/5) | the simulated data: SIM04 and SIM05, `sim/check.py` and `sim/expected.toml`, the event models | `docs/design.md`, the SIM05 bullet and the event format |
+| [#6](https://github.com/cpsc436c-2026w1/cp1-example/pull/6) | the Well-Architected review and its two changes in the design: the transaction and batch item failures, the provisioned shard | `docs/design.md`, Counting requests and the stream's row; `docs/reviews/well-architected.md` |
+| [#7](https://github.com/cpsc436c-2026w1/cp1-example/pull/7) | the answers of RQ010 and RQ020: Cost, Experiments, the replay test, the units and the run's evidence in `evidence/` | `docs/requirements.md`, RQ010 and RQ020; `docs/design.md`, Cost and Experiments |
+| [#8](https://github.com/cpsc436c-2026w1/cp1-example/pull/8) | the budget and sandbox check report, this page, the README, the eval's README and the tests of the traceability check | not named |
 
 ## What stays a draft
 
-The rules R010, R020, R030, R040, R050, R070, R090, R100, R120 and RF040 have examples and do not have step code; SIM04 and SIM05
-are described and not generated; the scripts in `scripts/` do not exist yet. That is the state the text is in on Tuesday for
-every rule.
+The parts of the design that are not deployed: the trips table and the functions of JS02 and JS03, the API and the
+read function, the lake (Firehose, bucket, Glue jobs and tables, Athena) and the assistant. Their rules run on local
+code (`src/rides/assign.py`, `curate.py`, `compact.py`, `assistant.py`); RF040's example is tagged `@todo`; R110's
+eval runs on recorded replies, written by hand, not a model run. They come for the final hand-in.

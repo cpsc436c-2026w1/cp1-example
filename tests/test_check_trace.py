@@ -61,9 +61,6 @@ PLANTED = [
     ("rule 7: a data set built from a source that is not defined", DESIGN,
      "in SIM01's hour from DS01, at", "in SIM01's hour from DS05, at",
      "SIM03 is built from DS05"),
-    ("rule 7: a data set that names no source", DESIGN,
-     "in SIM01's hour from DS01, at", "in SIM01's hour, at",
-     "SIM03 does not name a DS"),
 ]
 
 
@@ -83,3 +80,117 @@ def test_exemptions_are_not_problems(copy):
     assert result.returncode == 0, result.stdout
     for code in ("R100", "RF050", "RQ010", "RQ020"):
         assert not any(code in line for line in result.stdout.splitlines() if line.startswith("PROBLEM"))
+
+
+def test_tags_above_an_outline_stay_with_the_outline(copy):
+    """Tags above Scenario Outline: or Examples: belong to that keyword, not to the next Rule."""
+    outline = """    @R010
+    Scenario Outline: Requests counted per zone, <zone>
+      Given a zone <zone>
+      Then the count is <n>
+
+      @R010
+      Examples:
+        | zone | n |
+        | Z1   | 1 |
+
+"""
+    change(copy, COUNTS, "  @R020\n", outline + "  @R020\n")
+    result = run(copy)
+    assert "already the tag of the Rule" not in result.stdout, result.stdout
+    assert result.returncode == 0, result.stdout
+
+
+def test_an_id_in_design_prose_is_not_a_use(copy):
+    """Only IDs in brackets and in the Resources IDs column count; a token like R2 in a sentence does not."""
+    change(copy, DESIGN, "## Resources", "Version R2 of the sketch is in the slides.\n\n## Resources")
+    result = run(copy)
+    assert result.returncode == 0, result.stdout
+
+
+def test_a_rule_without_an_example_is_a_problem(copy):
+    """Rule 8: the Checkpoint 1 page asks for at least one example under each rule."""
+    empty = "  @R999\n  Rule: A rule with no example yet\n\n"
+    change(copy, REQ, "- **R010**", "- **R999** THE SYSTEM SHALL keep a placeholder.\n- **R010**")
+    change(copy, COUNTS, "  @R020\n", empty + "  @R020\n")
+    result = run(copy)
+    assert "this Rule has no Example" in result.stdout, result.stdout
+    assert result.returncode == 1
+
+
+def test_a_rule_whose_examples_are_an_outline_is_not_a_problem(copy):
+    """An outline under a rule counts as its example."""
+    rule = ("  @R999\n  Rule: A rule shown by an outline\n\n    Scenario Outline: zone <zone>\n      Given a zone <zone>\n\n"
+            "      Examples:\n        | zone |\n        | Z1   |\n\n")
+    change(copy, REQ, "- **R010**", "- **R999** THE SYSTEM SHALL keep a placeholder.\n- **R010**")
+    change(copy, COUNTS, "  @R020\n", rule + "  @R020\n")
+    result = run(copy)
+    assert "has no Example" not in result.stdout, result.stdout
+
+
+@pytest.mark.parametrize("old,new", [
+    ("- **R030**", "* **R030**"), ("- **R030**", "- **`R030`**"), ("- **R030**", "-   **R030**"), ("- **R030**", "- `R030`"),
+])
+def test_other_requirement_list_formats_define_the_id(copy, old, new):
+    change(copy, REQ, old, new)
+    result = run(copy)
+    assert result.returncode == 0, result.stdout
+
+
+def test_a_read_line_with_a_rule_is_a_problem(copy):
+    change(copy, COUNTS, "  @R020\n", "  @RF050\n  Rule: Tags on every resource\n    Example: a bucket\n      Given x\n\n  @R020\n")
+    result = run(copy)
+    assert "RF050 ends with Read:, so it must not get a rule" in result.stdout, result.stdout
+
+
+def test_an_rf_without_link_reply_or_read_is_a_problem(copy):
+    change(copy, REQ, "- **RF050**", "- **RF060** Every zone has a name. Reply: we keep a zone table.\n- **RF050**")
+    result = run(copy)
+    assert "RF060 has no [Scenario](...) link" in result.stdout, result.stdout
+
+
+def test_a_wrong_folder_gives_a_message_not_a_traceback(tmp_path):
+    result = run(tmp_path)
+    assert result.returncode == 1 and "Traceback" not in result.stderr
+    assert "not found" in result.stdout
+
+
+def test_docstrings_bom_subfolders_and_heading_case(copy):
+    doc = '      """\n      @R666\n      Rule: not a rule\n      """\n'
+    change(copy, COUNTS, "      Given ", doc + "      Given ")
+    path = copy / COUNTS
+    path.write_text(path.read_text(), encoding="utf-8-sig")
+    (copy / "features/sub").mkdir()
+    (copy / ASSIGN).rename(copy / "features/sub" / Path(ASSIGN).name)
+    req = copy / REQ
+    req.write_text(req.read_text().replace("features/trip_assignment.feature", "features/sub/trip_assignment.feature"))
+    change(copy, DESIGN, "### Our data", "### Our Data")
+    result = run(copy)
+    assert result.returncode == 0, result.stdout
+
+
+def test_a_plain_mention_of_a_defined_id_is_not_a_definition(copy):
+    """IDs in a notes list or a heading that discusses them do not define them again."""
+    path = copy / REQ
+    path.write_text(path.read_text() + "\n## Notes\n\n- R010 and R020 share the SLO\n\n### R010 why we count\n")
+    result = run(copy)
+    assert result.returncode == 0, result.stdout
+
+
+def test_a_plain_only_definition_gets_a_hint(copy):
+    change(copy, REQ, "- **R030**", "- R030")
+    result = run(copy)
+    assert "R030 starts a line but is not bold" in result.stdout, result.stdout
+
+
+def test_an_unclosed_docstring_is_reported(copy):
+    change(copy, COUNTS, "      Given ", '      """\n      Given ')
+    result = run(copy)
+    assert "docstring is not closed" in result.stdout, result.stdout
+
+
+def test_a_data_set_that_names_no_source_is_not_a_problem(copy):
+    """Simulated data can be made up: the Checkpoint 1 page asks for no source."""
+    change(copy, DESIGN, "in SIM01's hour from DS01, at", "in SIM01's hour, at")
+    result = run(copy)
+    assert "does not name a DS" not in result.stdout and "SIM03 is built from" not in result.stdout, result.stdout

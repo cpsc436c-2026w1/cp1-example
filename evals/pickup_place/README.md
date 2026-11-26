@@ -1,6 +1,8 @@
 # Eval pickup-place (R110)
 
-> **Only a demonstration.** The step code here (`features/steps/pickup_steps.py`) shows how an LLM eval runs in behave. You do not write step code for Checkpoint 1: there, the eval is the `## Evals` entry and the `@eval` example, checked with `behave --dry-run`.
+> **Recorded replies, not a model run.** At Checkpoint 2 every example of `features/js04_pickup_place.feature` has step
+> code (`features/steps/pickup_steps.py`) and passes on replies written by hand. A pass shows that the checker, the
+> gate and what the page shows work; it does not show that the model meets R110.
 
 The eval of requirement R110 in `docs/requirements.md` (section Evals): does the assistant find the pickup place in
 a rider's message, or `null` when the message does not name one?
@@ -9,6 +11,7 @@ a rider's message, or `null` when the message does not name one?
 |---|---|
 | `cases.jsonl` | 10 rider messages written by the team, each with its reference value: 7 name a pickup place, 3 do not (case 8 names only a destination) |
 | `places.txt` | our list of places; every reference value is a name on it, or `null` |
+| `replies_examples.jsonl` | the recorded reply of R120's example, whose message is not a case: `{"pickup_place": "more than one"}`, written by hand |
 | `replies_recorded.jsonl` | 30 replies, 3 for each case. **Recorded examples, written by hand, not a model run**: they show the checker and the gate. Four are wrong on purpose: text around the JSON (case 3), the destination in place of the pickup (case 4, case 8), a second field (case 9) |
 | `check.py` | the checker: a run is correct when its reply is a JSON object with exactly one field, `pickup_place`, whose value equals the reference value. Standard library only, no model call |
 
@@ -18,9 +21,9 @@ The gate is the `@eval` example in `features/js04_pickup_place.feature`; its ste
 at `ask_model_live`, where the call through the course LLM gateway goes: it is not written yet, because a live run
 spends money and waits for the instructor's go.
 
-Output below is pasted from runs on 2026-11-20, branch `main`. Every run here is **checker only, recorded replies**:
+Output below is pasted from runs on 2026-11-26, tag `cp2` (the checker's output is the same as on 2026-11-20). Every run here is **checker only, recorded replies**:
 a pass shows that the checker and the gate work, not that the model meets R110. A claim about the model waits for a
-live run through the course LLM gateway, at Checkpoint 2.
+live run through the course LLM gateway, which is not written yet.
 
 ## Checker alone (checker only, recorded replies)
 
@@ -53,57 +56,41 @@ Feature: Pickup place of a rider's message # features/js04_pickup_place.feature:
   rider's message to the model as the user message; the output format is a JSON object with one field,
   pickup_place: a name from evals/pickup_place/places.txt, null when the message names no pickup place, or
   "more than one" when it names more than one.
-  Step code: this example repository has step code for this feature only, to show how an LLM eval runs in behave.
-  You do not write step code for Checkpoint 1.
+  The replies are recorded examples written by hand (evals/pickup_place/), not a model run: the examples check the
+  checker and what the page shows, not the model.
     Example: Message that names a pickup place                                                  # features/js04_pickup_place.feature:13
-      Given the rider message "I'm waiting outside JFK Terminal 4, door 6. Where is my driver?" # features/steps/pickup_steps.py:45
-      When the support agent opens the message                                                  # features/steps/pickup_steps.py:50
-      Then the pickup place is "JFK Terminal 4"                                                 # features/steps/pickup_steps.py:59
+      Given the rider message "I'm waiting outside JFK Terminal 4, door 6. Where is my driver?" # features/steps/pickup_steps.py:52
+      When the support agent opens the message                                                  # features/steps/pickup_steps.py:57
+      Then the pickup place is "JFK Terminal 4"                                                 # features/steps/pickup_steps.py:63
 
     Example: Message that names only a destination                                                    # features/js04_pickup_place.feature:18
-      Given the rider message "Take me to Penn Station. I haven't decided where to be picked up yet." # features/steps/pickup_steps.py:45
-      When the support agent opens the message                                                        # features/steps/pickup_steps.py:50
-      Then the system says that the message names no pickup place                                     # features/steps/pickup_steps.py:64
+      Given the rider message "Take me to Penn Station. I haven't decided where to be picked up yet." # features/steps/pickup_steps.py:52
+      When the support agent opens the message                                                        # features/steps/pickup_steps.py:57
+      Then the system says that the message names no pickup place                                     # features/steps/pickup_steps.py:68
 
     @eval
     Example: Eval of pickup places                                   # features/js04_pickup_place.feature:24
-      Given the 10 cases of the eval "pickup-place"                  # features/steps/pickup_steps.py:69
-      When the model that the system uses answers each case 3 times  # features/steps/pickup_steps.py:76
-      Then the pickup place is correct in at least 24 of the 30 runs # features/steps/pickup_steps.py:88
+      Given the 10 cases of the eval "pickup-place"                  # features/steps/pickup_steps.py:79
+      When the model that the system uses answers each case 3 times  # features/steps/pickup_steps.py:86
+      Then the pickup place is correct in at least 24 of the 30 runs # features/steps/pickup_steps.py:98
 
     Example: Message that names two pickup places                                                                            # features/js04_pickup_place.feature:32
-      Given the rider message "Pick me up at Penn Station or at Grand Central Terminal, whichever is faster for the driver." # features/steps/pickup_steps.py:45
-      When the support agent opens the message                                                                               # features/steps/pickup_steps.py:50
-      ERROR: StepNotImplementedError: this message is not a case of evals/pickup_place/cases.jsonl, so it does not have a recorded reply
+      Given the rider message "Pick me up at Penn Station or at Grand Central Terminal, whichever is faster for the driver." # features/steps/pickup_steps.py:52
+      When the support agent opens the message                                                                               # features/steps/pickup_steps.py:57
+      Then the system says that the message names more than one pickup place                                                 # features/steps/pickup_steps.py:73
 
-      Then the system says that the message names more than one pickup place                                                 # None
-
-
-You can implement step definitions for undefined steps with these snippets:
-
-from behave.api.pending_step import StepNotImplementedError
-@then(u'the system says that the message names more than one pickup place')
-def step_impl(context):
-    raise StepNotImplementedError(u'Then the system says that the message names more than one pickup place')
-
-
-
-Errored scenarios:
-  features/js04_pickup_place.feature:32  Message that names two pickup places
-
-0 features passed, 0 failed, 1 error, 0 skipped
-1 rule passed, 0 failed, 1 error, 0 skipped
-3 scenarios passed, 0 failed, 1 error, 0 skipped
-10 steps passed, 0 failed, 0 skipped, 1 pending, 1 undefined
+1 feature passed, 0 failed, 0 skipped
+2 rules passed, 0 failed, 0 skipped
+4 scenarios passed, 0 failed, 0 skipped
+12 steps passed, 0 failed, 0 skipped
 Took 0min 0.000s
 $ echo $?
-1
+0
 ```
 
-R110's three examples pass. R120's example (a message that names two pickup places) is a draft: its message is not
-a case, so there is not a recorded reply for it (`pending`), and its `Then` does not have step code (`undefined`).
-That example errors, and the run ends with exit code 1. `--tags=@R110` runs R110's examples alone; the two runs below
-use it.
+R110's three examples and R120's pass. R120's message is not a case of the eval: its reply is the recorded one of
+`replies_examples.jsonl`, and the page shows "more than one" (`src/rides/assistant.py`). `--tags=@R110` runs R110's
+examples alone; the two runs below use it.
 
 ## Gate fails below 24 of 30
 
@@ -112,7 +99,7 @@ back:
 
 ```
 $ uvx behave@1.3.3 --tags=@R110 features/js04_pickup_place.feature        # from the gate on
-      Then the pickup place is correct in at least 24 of the 30 runs # features/steps/pickup_steps.py:88
+      Then the pickup place is correct in at least 24 of the 30 runs # features/steps/pickup_steps.py:98
       ASSERT FAILED: correct in 23 of 30 runs, at least 24 needed
       case  reference                 correct  wrong runs
          1  "JFK Terminal 4"          3 of 3   
@@ -142,7 +129,7 @@ The threshold in the feature changed to 27, then put back:
 
 ```
 $ uvx behave@1.3.3 --tags=@R110 features/js04_pickup_place.feature        # from the gate on
-      Then the pickup place is correct in at least 27 of the 30 runs # features/steps/pickup_steps.py:88
+      Then the pickup place is correct in at least 27 of the 30 runs # features/steps/pickup_steps.py:98
       ASSERT FAILED: correct in 26 of 30 runs, at least 27 needed
       case  reference                 correct  wrong runs
          1  "JFK Terminal 4"          3 of 3   
@@ -177,15 +164,5 @@ $ REPLIES=live uvx behave@1.3.3 features/js04_pickup_place.feature
 
 ## Checks of the whole repository
 
-```
-$ uvx behave@1.3.3 --dry-run --no-snippets              # last lines: the error and the 31 undefined steps are draft rules (as on main)
-0 features passed, 0 failed, 0 skipped, 4 untested
-0 rules passed, 0 failed, 1 error, 0 skipped, 13 untested
-0 scenarios passed, 0 failed, 1 error, 0 skipped, 21 untested
-0 steps passed, 0 failed, 0 skipped, 31 undefined, 53 untested
-Took 0min 0.000s
-$ python3 tools/check_trace.py                          # last line
-29 IDs, 0 problems
-$ uv run pytest -q
-37 passed in 2.01s
-```
+See `DEMO.md`, Checkpoint 2: `uvx behave@1.3.3` runs every example (22 scenarios pass), `python3 tools/check_trace.py`
+ends with `29 IDs, 0 problems, 2 decisions`, and `uv run pytest -q` passes 72 tests.
