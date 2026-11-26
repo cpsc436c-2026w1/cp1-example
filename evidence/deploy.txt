@@ -1,0 +1,15 @@
+2026-11-26T05:50:17Z
+created stream t00-trip-events (1 shard, provisioned)
+t00-trip-events ready
+created table t00-zone-counts
+created table t00-seen-events
+created function t00-count-requests
+created mapping t00-trip-events -> t00-count-requests
+counting path ready
+stream t00-trip-events: ACTIVE, provisioned, 1 shard, created 2026-11-25T21:50:16Z
+table t00-zone-counts: ACTIVE, 0 items (updated every 6 hours)
+table t00-seen-events: ACTIVE, 0 items (updated every 6 hours)
+function t00-count-requests: Active, python3.12, arm64, 128 MB
+mapping fd4c6e2f-7fb5-4bea-b6a8-1e093199fbf7: Enabled, batch 100, last result No records processed
+log group /aws/lambda/t00-count-requests: 0 bytes, kept 7 days
+2026-11-26T05:51:08Z

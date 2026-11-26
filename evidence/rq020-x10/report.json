@@ -1,0 +1,50 @@
+{
+  "run_id": "rq020-x10",
+  "speed": 10.0,
+  "deliveries_sent": 2332,
+  "put_calls": 1774,
+  "replay_s": 422.513,
+  "requests": 837,
+  "counted": 837,
+  "r010_data_latency": {
+    "n": 36,
+    "median_s": 0.0,
+    "p95_s": 0.978,
+    "max_s": 1.008
+  },
+  "r020_data_latency": {
+    "n": 2,
+    "median_s": 0.393,
+    "p95_s": 0.546,
+    "max_s": 0.546
+  },
+  "request_lag": {
+    "n": 837,
+    "median_s": 0.663,
+    "p95_s": 1.095,
+    "max_s": 1.94
+  },
+  "lag_to_stream": {
+    "n": 837,
+    "median_s": 0.006,
+    "p95_s": 0.009,
+    "max_s": 0.036
+  },
+  "lag_stream_to_count": {
+    "n": 837,
+    "median_s": 0.655,
+    "p95_s": 1.09,
+    "max_s": 1.904
+  },
+  "trips_09_to_10": {
+    "48": 304,
+    "161": 191,
+    "230": 342
+  },
+  "truth_09_to_10": {
+    "48": 304,
+    "161": 191,
+    "230": 342
+  },
+  "counts_match_truth": true
+}

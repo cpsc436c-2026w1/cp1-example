@@ -1,0 +1,7 @@
+would delete  Kinesis stream t00-trip-events (hourly)
+would delete  event source mapping fd4c6e2f-7fb5-4bea-b6a8-1e093199fbf7 (t00-trip-events -> t00-count-requests)
+would delete  Lambda function t00-count-requests
+would delete  DynamoDB table t00-zone-counts
+would delete  DynamoDB table t00-seen-events
+would delete  log group /aws/lambda/t00-count-requests
+dry run: nothing deleted (bash scripts/teardown.sh --yes deletes)

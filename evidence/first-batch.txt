@@ -1,0 +1,3 @@
+first batch: 4 records (one sent twice), all counted 28.3 s after the put
+rows: [{'zone': 161, 'start': '2026-11-23T09:00:00Z', 'end': '2026-11-23T09:05:00Z', 'trips': 2}, {'zone': 230, 'start': '2026-11-23T09:00:00Z', 'end': '2026-11-23T09:05:00Z', 'trips': 1}]
+seen: [('ev-000001', 27514), ('ev-000002', 27783), ('ev-000003', 27810)]

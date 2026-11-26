@@ -1,0 +1,26 @@
+# deploy again after the teardown (2026-11-26T07:14:51Z)
+$ uv run python scripts/stream.py up && uv run python scripts/counting.py up
+created stream t00-trip-events (1 shard, provisioned)
+t00-trip-events ready
+created table t00-zone-counts
+created table t00-seen-events
+created function t00-count-requests
+reserved concurrency 1 on t00-count-requests
+created mapping t00-trip-events -> t00-count-requests
+counting path ready
+$ TARGET=aws uv run behave features/js01_trips_per_zone.feature --tags="not @todo" --name "One request delivered twice"    # 2026-11-26T07:15:41Z
+1 feature passed, 0 failed, 0 skipped
+1 rule passed, 0 failed, 5 skipped
+1 scenario passed, 0 failed, 9 skipped
+3 steps passed, 0 failed, 36 skipped
+Took 0min 0.000s
+$ bash scripts/teardown.sh --yes    # 2026-11-26T07:16:55Z
+deleted       Kinesis stream t00-trip-events (hourly)
+deleted       event source mapping 118bd2d1-41db-4169-9631-638ecfe010c3 (t00-trip-events -> t00-count-requests)
+deleted       Lambda function t00-count-requests
+deleted       DynamoDB table t00-zone-counts
+deleted       DynamoDB table t00-seen-events
+deleted       log group /aws/lambda/t00-count-requests
+nothing left with the prefix t00- (Kinesis streams, Lambda functions and mappings, DynamoDB tables, log groups)
+exit 0
+# done 2026-11-26T07:17:17Z

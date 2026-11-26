@@ -1,0 +1,16 @@
+$ uv run python scripts/stream.py up    # 2026-11-26T07:11:29Z, the slice already deployed
+stream t00-trip-events is there (ACTIVE): kept
+t00-trip-events ready
+$ uv run python scripts/counting.py up
+table t00-zone-counts is there (ACTIVE): kept
+table t00-seen-events is there (ACTIVE): kept
+function t00-count-requests is there: code and settings updated
+reserved concurrency 1 on t00-count-requests
+mapping t00-trip-events -> t00-count-requests is there: settings updated
+counting path ready
+$ uv run python scripts/counting.py status
+table t00-zone-counts: ACTIVE, 0 items (updated every 6 hours)
+table t00-seen-events: ACTIVE, 0 items (updated every 6 hours)
+function t00-count-requests: Active, python3.12, arm64, 128 MB
+mapping fd4c6e2f-7fb5-4bea-b6a8-1e093199fbf7: Enabled, batch 100, last result OK
+log group /aws/lambda/t00-count-requests: 0 bytes, kept 7 days

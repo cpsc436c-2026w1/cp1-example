@@ -1,0 +1,10 @@
+$ bash scripts/teardown.sh --yes    # 2026-11-26T07:14:22Z
+deleted       Kinesis stream t00-trip-events (hourly)
+deleted       event source mapping fd4c6e2f-7fb5-4bea-b6a8-1e093199fbf7 (t00-trip-events -> t00-count-requests)
+deleted       Lambda function t00-count-requests
+deleted       DynamoDB table t00-zone-counts
+deleted       DynamoDB table t00-seen-events
+deleted       log group /aws/lambda/t00-count-requests
+nothing left with the prefix t00- (Kinesis streams, Lambda functions and mappings, DynamoDB tables, log groups)
+exit 0
+# done 2026-11-26T07:14:44Z

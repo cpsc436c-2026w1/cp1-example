@@ -1,0 +1,33 @@
+$ uv run python scripts/run_units.py --recost --stream-hours 1.45    # after both teardowns: 05:50:16 to 07:14:44 and 07:14:50 to 07:17:17 UTC
+{
+  "window": [
+    "2026-11-26T05:49:00Z",
+    "2026-11-26T07:14:18Z"
+  ],
+  "stream_hours": 1.45,
+  "records_in": 11499.0,
+  "bytes_in": 2754744.0,
+  "lambda_runs": 2116,
+  "lambda_billed_ms": 135182,
+  "lambda_memory_mb": 128,
+  "lambda_gb_s": 16.89775,
+  "write_units": {
+    "t00-zone-counts": 8474.0,
+    "t00-seen-events": 11682.0
+  },
+  "read_units": {
+    "t00-zone-counts": 94.0,
+    "t00-seen-events": 22433.0
+  },
+  "log_bytes": 939319.0,
+  "total_usd": 0.0422,
+  "total_cad": 0.0612
+}
+Kinesis shard-hours            0.023925 USD
+Kinesis PUT payload units      0.000177 USD
+Lambda requests                0.000423 USD
+Lambda duration (arm64)        0.000225 USD
+DynamoDB write units           0.013857 USD
+DynamoDB read units            0.003097 USD
+CloudWatch Logs ingestion      0.000517 USD
+total                            0.0422 USD = 0.0612 CAD
