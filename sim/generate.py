@@ -1,8 +1,8 @@
-"""Write the simulated data sets to sim/data/<id>/ as JSONL.
+"""Write the simulated data sets to sim/data/<id>/.
 
-    uv run python -m sim.generate          # writes SIM01, SIM02, SIM03 and prints what it wrote
+    uv run python -m sim.generate              # SIM01 to SIM03 (committed)
 
-The seed is fixed, so every run writes the same files. Each data set has:
+The seed is fixed, so every run writes the same files, byte for byte. Each data set has:
 
     sim/data/<id>/trip-events/dt=<day>/hour=<hour>/deliveries.jsonl   what the system receives, in the order received
     sim/data/<id>/_truth/events.jsonl    each event once, as it happened: expected answers are computed from it
@@ -14,10 +14,11 @@ import csv
 import json
 import random
 import shutil
+import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from sim.datasets import DATA_SETS, SEED, SEED_ROWS, SEED_START, SIM_START
+from sim.datasets import COMMITTED, DATA_SETS, SEED, SEED_ROWS, SEED_START, SIM_START
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "sim" / "data"
@@ -41,7 +42,7 @@ def read_seed_rows() -> list[dict]:
 
 
 def trip_events(rows: list[dict], rng: random.Random) -> list[dict]:
-    """Three events for each trip. Fields are those of docs/design.md, section Data, Event fields."""
+    """Three events for each trip. Fields are those of docs/design.md, section Data, Event format."""
     events = []
     for row in rows:
         driver = f"d-{rng.randint(1, 200):04d}"                    # DS01 does not have drivers: ours
@@ -65,6 +66,11 @@ def trip_events(rows: list[dict], rng: random.Random) -> list[dict]:
 
 def deliver(event: dict, received: datetime) -> dict:
     return {**event, "received_time": received}
+
+
+def hourly(d: dict) -> str:
+    """The file of a delivery: the day and hour it was received, as in raw/trip-events/."""
+    return f"trip-events/dt={d['received_time']:%Y-%m-%d}/hour={d['received_time']:%H}/deliveries.jsonl"
 
 
 def stream(sim_id: str) -> tuple[list[dict], list[dict], list[dict]]:
@@ -119,45 +125,66 @@ def double_accept(sim_id: str) -> tuple[list[dict], list[dict], list[dict]]:
     return events, deliveries, faults
 
 
+MAKERS = {"event stream": (stream, hourly), "two concurrent writers": (double_accept, hourly)}
+
+
+def dumps(line: dict) -> str:
+    return json.dumps(line, default=iso)
+
+
 def write(sim_id: str, events: list[dict], deliveries: list[dict], faults: list[dict]) -> Path:
     folder = OUT / sim_id
     shutil.rmtree(folder, ignore_errors=True)
-    by_hour: dict[Path, list[dict]] = {}
+    files: dict[Path, str] = {}
+    layout = MAKERS[DATA_SETS[sim_id]["kind"]][1]
+    by_file: dict[str, list[str]] = {}
     for d in deliveries:                                            # folder = day and hour of receipt, as in raw/
-        received = d["received_time"]
-        path = folder / "trip-events" / f"dt={received:%Y-%m-%d}" / f"hour={received:%H}" / "deliveries.jsonl"
-        by_hour.setdefault(path, []).append(d)
-    files = {**by_hour, folder / "_truth" / "events.jsonl": events, folder / "_truth" / "faults.jsonl": faults}
-    for path, lines in files.items():
+        by_file.setdefault(layout(d), []).append(dumps(d))
+    files.update({folder / rel: "\n".join(lines) + "\n" for rel, lines in by_file.items()})
+    files[folder / "_truth" / "events.jsonl"] = "".join(dumps(e) + "\n" for e in events)
+    files[folder / "_truth" / "faults.jsonl"] = "".join(dumps(f) + "\n" for f in faults)
+    for path, text in files.items():
         path.parent.mkdir(parents=True, exist_ok=True)
-        with open(path, "w") as f:
-            for line in lines:
-                f.write(json.dumps(line, default=iso) + "\n")
+        path.write_text(text)
     return folder
 
 
 def generate(sim_id: str) -> Path:
-    """Write one data set and return its folder."""
-    make = double_accept if DATA_SETS[sim_id]["kind"] == "two concurrent writers" else stream
+    """Write one data set and return its folder. Standard library only."""
+    make = MAKERS[DATA_SETS[sim_id]["kind"]][0]
     return write(sim_id, *make(sim_id))
 
 
 def read_jsonl(path: Path) -> list[dict]:
-    return [json.loads(line) for line in path.read_text().splitlines()]
+    return [json.loads(line) for line in path.read_text().splitlines() if line]
+
+
+def load_received(sim_id: str) -> list[dict]:
+    """What the system receives: the delivery files outside _truth/, in the order received. The examples read only
+    this."""
+    folder = OUT / sim_id
+    return [d for path in sorted(folder.glob("trip-events/dt=*/hour=*/*.jsonl")) for d in read_jsonl(path)]
+
+
+def is_written(sim_id: str) -> bool:
+    """The faults file is written last: a data set without it was not written to the end."""
+    return (OUT / sim_id / "_truth" / "faults.jsonl").exists()
 
 
 def load(sim_id: str) -> dict:
-    """A written data set: deliveries in the order received, the events as they happened, the injected faults."""
+    """A written data set: what the system receives, the events as they happened, the injected faults."""
     folder = OUT / sim_id
-    deliveries = [d for path in sorted(folder.glob("trip-events/dt=*/hour=*/deliveries.jsonl")) for d in read_jsonl(path)]
-    return dict(deliveries=deliveries, events=read_jsonl(folder / "_truth" / "events.jsonl"),
+    return dict(deliveries=load_received(sim_id), events=read_jsonl(folder / "_truth" / "events.jsonl"),
                 faults=read_jsonl(folder / "_truth" / "faults.jsonl"))
 
 
 if __name__ == "__main__":
-    for sim_id, cfg in DATA_SETS.items():
+    for sim_id in sys.argv[1:] or COMMITTED:
+        cfg = DATA_SETS[sim_id]
         folder = generate(sim_id)
         data = load(sim_id)
         kinds = sorted({f["fault"] for f in data["faults"]})
-        print(f'{sim_id} {cfg["name"]}: {len(data["events"])} events, {len(data["deliveries"])} deliveries, '
-              f'{len(data["faults"])} fault records ({", ".join(kinds)}) -> {folder.relative_to(ROOT)}/')
+        files = sum(1 for p in folder.rglob("*") if p.is_file() and "_truth" not in p.parts)
+        print(f'{sim_id} {cfg["name"]}: {len(data["events"])} events, {len(data["deliveries"])} deliveries in '
+              f'{files} file{"s" * (files != 1)}, {len(data["faults"])} fault records ({", ".join(kinds)}) '
+              f'-> {folder.relative_to(ROOT)}/')

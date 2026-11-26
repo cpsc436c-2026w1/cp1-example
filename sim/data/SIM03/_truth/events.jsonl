@@ -1,0 +1,60 @@
+{"event_type": "trip_requested", "trip_id": "t-0002", "rider_id": "p-30051", "pickup_zone_id": 161, "dropoff_zone_id": 230, "quoted_fare": 73.0, "event_time": "2026-11-23T09:00:00Z", "event_id": "ev-000001"}
+{"event_type": "trip_accepted", "trip_id": "t-0002", "driver_id": "d-0124", "event_time": "2026-11-23T09:00:17Z", "event_id": "ev-000002"}
+{"event_type": "trip_accepted", "trip_id": "t-0002", "driver_id": "d-0098", "event_time": "2026-11-23T09:00:15Z", "event_id": "ev-000003"}
+{"event_type": "trip_requested", "trip_id": "t-0003", "rider_id": "p-46735", "pickup_zone_id": 161, "dropoff_zone_id": 234, "quoted_fare": 42.15, "event_time": "2026-11-23T09:00:00Z", "event_id": "ev-000004"}
+{"event_type": "trip_accepted", "trip_id": "t-0003", "driver_id": "d-0095", "event_time": "2026-11-23T09:00:07Z", "event_id": "ev-000005"}
+{"event_type": "trip_accepted", "trip_id": "t-0003", "driver_id": "d-0046", "event_time": "2026-11-23T09:00:06Z", "event_id": "ev-000006"}
+{"event_type": "trip_requested", "trip_id": "t-0012", "rider_id": "p-82831", "pickup_zone_id": 161, "dropoff_zone_id": 237, "quoted_fare": 27.13, "event_time": "2026-11-23T09:00:10Z", "event_id": "ev-000007"}
+{"event_type": "trip_accepted", "trip_id": "t-0012", "driver_id": "d-0145", "event_time": "2026-11-23T09:00:15Z", "event_id": "ev-000008"}
+{"event_type": "trip_accepted", "trip_id": "t-0012", "driver_id": "d-0182", "event_time": "2026-11-23T09:00:14Z", "event_id": "ev-000009"}
+{"event_type": "trip_requested", "trip_id": "t-0015", "rider_id": "p-68663", "pickup_zone_id": 161, "dropoff_zone_id": 138, "quoted_fare": 53.8, "event_time": "2026-11-23T09:00:25Z", "event_id": "ev-000010"}
+{"event_type": "trip_accepted", "trip_id": "t-0015", "driver_id": "d-0155", "event_time": "2026-11-23T09:00:29Z", "event_id": "ev-000011"}
+{"event_type": "trip_accepted", "trip_id": "t-0015", "driver_id": "d-0115", "event_time": "2026-11-23T09:00:28Z", "event_id": "ev-000012"}
+{"event_type": "trip_requested", "trip_id": "t-0017", "rider_id": "p-50123", "pickup_zone_id": 161, "dropoff_zone_id": 50, "quoted_fare": 13.6, "event_time": "2026-11-23T09:00:31Z", "event_id": "ev-000013"}
+{"event_type": "trip_accepted", "trip_id": "t-0017", "driver_id": "d-0130", "event_time": "2026-11-23T09:00:43Z", "event_id": "ev-000014"}
+{"event_type": "trip_accepted", "trip_id": "t-0017", "driver_id": "d-0002", "event_time": "2026-11-23T09:00:41Z", "event_id": "ev-000015"}
+{"event_type": "trip_requested", "trip_id": "t-0035", "rider_id": "p-55559", "pickup_zone_id": 161, "dropoff_zone_id": 230, "quoted_fare": 13.39, "event_time": "2026-11-23T09:02:36Z", "event_id": "ev-000016"}
+{"event_type": "trip_accepted", "trip_id": "t-0035", "driver_id": "d-0150", "event_time": "2026-11-23T09:02:44Z", "event_id": "ev-000017"}
+{"event_type": "trip_accepted", "trip_id": "t-0035", "driver_id": "d-0131", "event_time": "2026-11-23T09:02:42Z", "event_id": "ev-000018"}
+{"event_type": "trip_requested", "trip_id": "t-0038", "rider_id": "p-10960", "pickup_zone_id": 161, "dropoff_zone_id": 230, "quoted_fare": 13.01, "event_time": "2026-11-23T09:02:48Z", "event_id": "ev-000019"}
+{"event_type": "trip_accepted", "trip_id": "t-0038", "driver_id": "d-0154", "event_time": "2026-11-23T09:02:58Z", "event_id": "ev-000020"}
+{"event_type": "trip_accepted", "trip_id": "t-0038", "driver_id": "d-0123", "event_time": "2026-11-23T09:02:56Z", "event_id": "ev-000021"}
+{"event_type": "trip_requested", "trip_id": "t-0040", "rider_id": "p-90918", "pickup_zone_id": 161, "dropoff_zone_id": 160, "quoted_fare": 51.76, "event_time": "2026-11-23T09:03:02Z", "event_id": "ev-000022"}
+{"event_type": "trip_accepted", "trip_id": "t-0040", "driver_id": "d-0070", "event_time": "2026-11-23T09:03:08Z", "event_id": "ev-000023"}
+{"event_type": "trip_accepted", "trip_id": "t-0040", "driver_id": "d-0046", "event_time": "2026-11-23T09:03:06Z", "event_id": "ev-000024"}
+{"event_type": "trip_requested", "trip_id": "t-0044", "rider_id": "p-60219", "pickup_zone_id": 161, "dropoff_zone_id": 265, "quoted_fare": 57.23, "event_time": "2026-11-23T09:03:28Z", "event_id": "ev-000025"}
+{"event_type": "trip_accepted", "trip_id": "t-0044", "driver_id": "d-0174", "event_time": "2026-11-23T09:03:34Z", "event_id": "ev-000026"}
+{"event_type": "trip_accepted", "trip_id": "t-0044", "driver_id": "d-0196", "event_time": "2026-11-23T09:03:33Z", "event_id": "ev-000027"}
+{"event_type": "trip_requested", "trip_id": "t-0064", "rider_id": "p-31589", "pickup_zone_id": 161, "dropoff_zone_id": 246, "quoted_fare": 52.69, "event_time": "2026-11-23T09:05:02Z", "event_id": "ev-000028"}
+{"event_type": "trip_accepted", "trip_id": "t-0064", "driver_id": "d-0081", "event_time": "2026-11-23T09:05:11Z", "event_id": "ev-000029"}
+{"event_type": "trip_accepted", "trip_id": "t-0064", "driver_id": "d-0179", "event_time": "2026-11-23T09:05:09Z", "event_id": "ev-000030"}
+{"event_type": "trip_requested", "trip_id": "t-0071", "rider_id": "p-28435", "pickup_zone_id": 161, "dropoff_zone_id": 230, "quoted_fare": 7.33, "event_time": "2026-11-23T09:05:21Z", "event_id": "ev-000031"}
+{"event_type": "trip_accepted", "trip_id": "t-0071", "driver_id": "d-0099", "event_time": "2026-11-23T09:05:36Z", "event_id": "ev-000032"}
+{"event_type": "trip_accepted", "trip_id": "t-0071", "driver_id": "d-0065", "event_time": "2026-11-23T09:05:38Z", "event_id": "ev-000033"}
+{"event_type": "trip_requested", "trip_id": "t-0076", "rider_id": "p-84942", "pickup_zone_id": 161, "dropoff_zone_id": 211, "quoted_fare": 24.34, "event_time": "2026-11-23T09:05:36Z", "event_id": "ev-000034"}
+{"event_type": "trip_accepted", "trip_id": "t-0076", "driver_id": "d-0187", "event_time": "2026-11-23T09:05:49Z", "event_id": "ev-000035"}
+{"event_type": "trip_accepted", "trip_id": "t-0076", "driver_id": "d-0199", "event_time": "2026-11-23T09:05:51Z", "event_id": "ev-000036"}
+{"event_type": "trip_requested", "trip_id": "t-0078", "rider_id": "p-64785", "pickup_zone_id": 161, "dropoff_zone_id": 236, "quoted_fare": 25.98, "event_time": "2026-11-23T09:05:52Z", "event_id": "ev-000037"}
+{"event_type": "trip_accepted", "trip_id": "t-0078", "driver_id": "d-0174", "event_time": "2026-11-23T09:05:57Z", "event_id": "ev-000038"}
+{"event_type": "trip_accepted", "trip_id": "t-0078", "driver_id": "d-0141", "event_time": "2026-11-23T09:05:58Z", "event_id": "ev-000039"}
+{"event_type": "trip_requested", "trip_id": "t-0079", "rider_id": "p-13098", "pickup_zone_id": 161, "dropoff_zone_id": 138, "quoted_fare": 61.17, "event_time": "2026-11-23T09:05:52Z", "event_id": "ev-000040"}
+{"event_type": "trip_accepted", "trip_id": "t-0079", "driver_id": "d-0122", "event_time": "2026-11-23T09:05:56Z", "event_id": "ev-000041"}
+{"event_type": "trip_accepted", "trip_id": "t-0079", "driver_id": "d-0157", "event_time": "2026-11-23T09:05:58Z", "event_id": "ev-000042"}
+{"event_type": "trip_requested", "trip_id": "t-0086", "rider_id": "p-32576", "pickup_zone_id": 161, "dropoff_zone_id": 74, "quoted_fare": 28.98, "event_time": "2026-11-23T09:06:09Z", "event_id": "ev-000043"}
+{"event_type": "trip_accepted", "trip_id": "t-0086", "driver_id": "d-0032", "event_time": "2026-11-23T09:06:14Z", "event_id": "ev-000044"}
+{"event_type": "trip_accepted", "trip_id": "t-0086", "driver_id": "d-0038", "event_time": "2026-11-23T09:06:16Z", "event_id": "ev-000045"}
+{"event_type": "trip_requested", "trip_id": "t-0087", "rider_id": "p-57389", "pickup_zone_id": 161, "dropoff_zone_id": 1, "quoted_fare": 125.9, "event_time": "2026-11-23T09:06:12Z", "event_id": "ev-000046"}
+{"event_type": "trip_accepted", "trip_id": "t-0087", "driver_id": "d-0129", "event_time": "2026-11-23T09:06:19Z", "event_id": "ev-000047"}
+{"event_type": "trip_accepted", "trip_id": "t-0087", "driver_id": "d-0184", "event_time": "2026-11-23T09:06:20Z", "event_id": "ev-000048"}
+{"event_type": "trip_requested", "trip_id": "t-0091", "rider_id": "p-62240", "pickup_zone_id": 161, "dropoff_zone_id": 223, "quoted_fare": 42.21, "event_time": "2026-11-23T09:06:26Z", "event_id": "ev-000049"}
+{"event_type": "trip_accepted", "trip_id": "t-0091", "driver_id": "d-0122", "event_time": "2026-11-23T09:06:36Z", "event_id": "ev-000050"}
+{"event_type": "trip_accepted", "trip_id": "t-0091", "driver_id": "d-0083", "event_time": "2026-11-23T09:06:37Z", "event_id": "ev-000051"}
+{"event_type": "trip_requested", "trip_id": "t-0093", "rider_id": "p-92880", "pickup_zone_id": 161, "dropoff_zone_id": 161, "quoted_fare": 13.39, "event_time": "2026-11-23T09:06:28Z", "event_id": "ev-000052"}
+{"event_type": "trip_accepted", "trip_id": "t-0093", "driver_id": "d-0010", "event_time": "2026-11-23T09:06:43Z", "event_id": "ev-000053"}
+{"event_type": "trip_accepted", "trip_id": "t-0093", "driver_id": "d-0175", "event_time": "2026-11-23T09:06:45Z", "event_id": "ev-000054"}
+{"event_type": "trip_requested", "trip_id": "t-0096", "rider_id": "p-18153", "pickup_zone_id": 161, "dropoff_zone_id": 138, "quoted_fare": 87.98, "event_time": "2026-11-23T09:06:42Z", "event_id": "ev-000055"}
+{"event_type": "trip_accepted", "trip_id": "t-0096", "driver_id": "d-0025", "event_time": "2026-11-23T09:06:57Z", "event_id": "ev-000056"}
+{"event_type": "trip_accepted", "trip_id": "t-0096", "driver_id": "d-0023", "event_time": "2026-11-23T09:06:58Z", "event_id": "ev-000057"}
+{"event_type": "trip_requested", "trip_id": "t-0106", "rider_id": "p-53965", "pickup_zone_id": 161, "dropoff_zone_id": 88, "quoted_fare": 34.25, "event_time": "2026-11-23T09:07:31Z", "event_id": "ev-000058"}
+{"event_type": "trip_accepted", "trip_id": "t-0106", "driver_id": "d-0090", "event_time": "2026-11-23T09:07:41Z", "event_id": "ev-000059"}
+{"event_type": "trip_accepted", "trip_id": "t-0106", "driver_id": "d-0195", "event_time": "2026-11-23T09:07:42Z", "event_id": "ev-000060"}

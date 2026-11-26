@@ -19,3 +19,5 @@ DATA_SETS = {
     "SIM03": dict(name="double-accept", kind="two concurrent writers", source="DS01",
                   zone=161, trips=20, later_first=10),
 }
+
+COMMITTED = ("SIM01", "SIM02", "SIM03")    # written to sim/data/ and committed

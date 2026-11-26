@@ -1,15 +1,17 @@
-"""Steps for the pickup place of a rider's message (rule R110) and its eval pickup-place.
+"""Steps for the pickup place of a rider's message (rules R110, R120) and the eval pickup-place.
 
-The replies come from evals/pickup_place/replies_recorded.jsonl (REPLIES=recorded, the default): recorded
-examples written by hand, not a model run. REPLIES=live would ask the model through the course LLM gateway; it
-stops at ask_model_live below, which is not written yet.
+The replies come from evals/pickup_place/replies_recorded.jsonl, and for a message that is not an eval case (R120's)
+from replies_examples.jsonl (REPLIES=recorded, the default): recorded examples written by hand, not a model run.
+What the page shows for a reply is the rule of src/rides/assistant.py. REPLIES=live would ask the model through the
+course LLM gateway; it stops at ask_model_live below, which is not written yet.
 """
 import importlib.util
 import os
 from pathlib import Path
 
 from behave import given, then, when
-from behave.api.pending_step import StepNotImplementedError
+
+from rides.assistant import MORE_THAN_ONE, shown
 
 EVAL_DIR = Path(__file__).resolve().parents[2] / "evals" / "pickup_place"
 EVALS = {"pickup-place": EVAL_DIR}
@@ -37,9 +39,14 @@ def ask_model_live(message: str) -> str:
 
 def recorded_reply(message: str, run: int = 1) -> str:
     cases = {c["message"]: c["case"] for c in checker.load_cases()}
-    if message not in cases:                        # a draft example: there is not a recorded reply to show
-        raise StepNotImplementedError("this message is not a case of evals/pickup_place/cases.jsonl, so it does not have a recorded reply")
-    return next(r["reply"] for r in checker.load_replies() if r["case"] == cases[message] and r["run"] == run)
+    if message in cases:
+        return next(r["reply"] for r in checker.load_replies() if r["case"] == cases[message] and r["run"] == run)
+    examples = {r["message"]: r["reply"] for r in checker.load_replies(EVAL_DIR / "replies_examples.jsonl")}
+    assert message in examples, "this message has no recorded reply in evals/pickup_place/replies_examples.jsonl"
+    return examples[message]
+
+
+PLACES = [p for p in (EVAL_DIR / "places.txt").read_text().splitlines() if p.strip()]
 
 
 @given('the rider message "{message}"')
@@ -50,10 +57,7 @@ def step_message(context, message):
 @when("the support agent opens the message")
 def step_open(context):
     reply = ask_model_live(context.message) if replies_mode() == "live" else recorded_reply(context.message)
-    try:
-        context.pickup_place = checker.parse_reply(reply)
-    except ValueError as error:
-        raise AssertionError(f"the reply is {error}: {reply!r}") from None
+    context.reply, context.pickup_place = reply, shown(reply, PLACES)
 
 
 @then('the pickup place is "{place}"')
@@ -64,6 +68,12 @@ def step_place(context, place):
 @then("the system says that the message names no pickup place")
 def step_null(context):
     assert context.pickup_place is None, f"expected null, the system shows {context.pickup_place!r}"
+
+
+@then("the system says that the message names more than one pickup place")
+def step_more_than_one(context):
+    assert context.pickup_place == MORE_THAN_ONE, (f"expected {MORE_THAN_ONE!r}, the system shows "
+                                                   f"{context.pickup_place!r} (reply {context.reply!r})")
 
 
 @given('the {count:d} cases of the eval "{name}"')

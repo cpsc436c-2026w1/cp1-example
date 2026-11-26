@@ -1,22 +1,31 @@
-"""The generator: the same seed writes the same files, and the files hold what docs/design.md, section Data, Simulated data for the demos, says."""
+"""The generator: the same seed writes the same files, the committed files are the ones it writes, and the files
+hold what docs/design.md, section Data, Simulated data for the demos, says."""
 import hashlib
 from collections import Counter
+from pathlib import Path
 
 from sim import generate as g
-from sim.datasets import DATA_SETS
+from sim.datasets import COMMITTED
+
+COMMITTED_DATA = Path(__file__).resolve().parent.parent / "sim" / "data"
 
 
 def digest(folder):
     h = hashlib.sha256()
-    for path in sorted(folder.rglob("*.jsonl")):
+    for path in sorted(p for p in folder.rglob("*") if p.is_file()):
         h.update(str(path.relative_to(folder)).encode() + path.read_bytes())
     return h.hexdigest()
 
 
 def test_same_seed_same_files():
-    for sim_id in DATA_SETS:
+    for sim_id in COMMITTED:
         first = digest(g.generate(sim_id))
         assert digest(g.generate(sim_id)) == first, sim_id
+
+
+def test_committed_files_are_what_the_generator_writes():
+    for sim_id in COMMITTED:
+        assert digest(g.generate(sim_id)) == digest(COMMITTED_DATA / sim_id), f"{sim_id}: run uv run python -m sim.generate"
 
 
 def test_rush_hour_counts_and_faults():
@@ -64,3 +73,12 @@ def test_double_accept_pairs():
     later_first = [t for t, pair in by_trip.items() if pair[0]["event_time"] > pair[1]["event_time"]]
     assert sorted(later_first) == sorted(f["trip_id"] for f in data["faults"])
     assert len(later_first) == 10
+
+
+def test_the_system_reads_no_truth():
+    """What the examples read (load_received) is the same with the truth folder gone."""
+    folder = g.generate("SIM01")
+    before = g.load_received("SIM01")
+    for path in (folder / "_truth").iterdir():
+        path.unlink()
+    assert g.load_received("SIM01") == before

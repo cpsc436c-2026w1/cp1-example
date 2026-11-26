@@ -1,7 +1,12 @@
-"""Steps that put data in front of the system: a table inside the example, or a simulated data set by its id."""
+"""Steps that put data in front of the system: a table inside the example, or a simulated data set by its id.
+
+A data set is read as the system receives it: the files of sim/data/<id>/ outside _truth/ (sim/generate.py,
+load_received). SIM05 is not committed (42,797 files): the first example that names it writes it, with the same seed.
+"""
 from behave import given
 
 from sim.datasets import DATA_SETS
+from sim.generate import generate, is_written, load_received
 
 
 @given("only these trip requests are received:")
@@ -12,16 +17,14 @@ def step_requests_table(context):
         context.deliveries.append(delivery)
 
 
-@given("the function fails after it counted {event_id} and receives both requests again")
-def step_batch_again(context, event_id):
-    """Lambda sends the whole batch again after a failure: the function sees the counted request a second time."""
-    done = [d["event_id"] for d in context.deliveries].index(event_id) + 1
-    context.deliveries = context.deliveries[:done] + context.deliveries
-
-
 @given('the simulated data set {sim_id} "{name}"')
 def step_data_set(context, sim_id, name):
     assert sim_id in DATA_SETS, f"{sim_id} is not a data set in sim/datasets.py"
     assert DATA_SETS[sim_id]["name"] == name, f'{sim_id} is named "{DATA_SETS[sim_id]["name"]}", not "{name}"'
-    context.data_set = context.data_sets[sim_id]
-    context.deliveries = context.data_set["deliveries"]
+    if not is_written(sim_id):
+        generate(sim_id)                                  # SIM05: written on first use
+    context.data_set_id = sim_id
+    if DATA_SETS[sim_id]["kind"] != "minute files":       # SIM05 is read from its files by the steps that use it
+        if sim_id not in context.received:
+            context.received[sim_id] = load_received(sim_id)
+        context.deliveries = list(context.received[sim_id])
