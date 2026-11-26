@@ -1,0 +1,2 @@
+{"event_type": "trip_completed", "trip_id": "t-0808", "driver_id": "d-0175", "dropoff_zone_id": 77, "trip_miles": 18.22, "trip_time_s": 3842, "fare": 63.92, "driver_pay": 62.11, "event_time": "2026-11-23T11:06:58Z", "event_id": "ev-002510", "received_time": "2026-11-23T11:06:59Z"}
+{"event_type": "trip_completed", "trip_id": "t-0832", "driver_id": "d-0046", "dropoff_zone_id": 132, "trip_miles": 19.33, "trip_time_s": 4345, "fare": 53.23, "driver_pay": 68.51, "event_time": "2026-11-23T11:17:06Z", "event_id": "ev-002511", "received_time": "2026-11-23T11:17:07Z"}

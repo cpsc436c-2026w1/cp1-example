@@ -4,8 +4,8 @@ Feature: Pickup place of a rider's message
   rider's message to the model as the user message; the output format is a JSON object with one field,
   pickup_place: a name from evals/pickup_place/places.txt, null when the message names no pickup place, or
   "more than one" when it names more than one.
-  Step code: this example repository has step code for this feature only, to show how an LLM eval runs in behave.
-  You do not write step code for Checkpoint 1.
+  The replies are recorded examples written by hand (evals/pickup_place/), not a model run: the examples check the
+  checker and what the page shows, not the model.
 
   @R110
   Rule: Where the system includes the assistant, when a support agent opens a rider's message, the system shall show the pickup place that the message names, as a name from our list of places, or say that the message names no pickup place

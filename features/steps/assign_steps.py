@@ -1,4 +1,6 @@
-"""Steps for trip assignment (rule R080, RF030): one accept, and two accepts sent before either has an answer."""
+"""Steps for trip assignment and what the rider sees (rules R070, R080, R090, R100, RF030): one accept, two accepts
+sent before either has an answer, a completion, the rider's page. Local code only (src/rides/assign.py): the
+functions of JS02 and JS03 are not deployed at Checkpoint 2."""
 import threading
 import time
 from datetime import datetime
@@ -65,13 +67,26 @@ def step_accept_data_set(context):
         context.answers.update(accept_together(context.trips, [(trip_id, driver) for driver in drivers]))
 
 
+def seconds_between(earlier: str, later: str) -> float:
+    return (datetime.fromisoformat(later[:-1]) - datetime.fromisoformat(earlier[:-1])).total_seconds()
+
+
+def check_answer(context, deadline: str, driver_id: str, want: str) -> None:
+    """The time allowed is the deadline less the time of receipt; the time taken is measured around the accept."""
+    allowed_s = seconds_between(context.received, deadline)
+    answers = [a for (_, driver), a in context.answers.items() if driver == driver_id]
+    assert answers == [want], f"driver {driver_id}: expected {want}, the system answered {answers}"
+    assert context.took_s <= allowed_s, f"driver {driver_id}: answer after {context.took_s:.2f} s, allowed {allowed_s:.0f} s"
+
+
 @then("by {deadline} driver {driver_id} has the answer that the accept is refused")
 def step_refused_by(context, deadline, driver_id):
-    """The time allowed is the deadline less the time of receipt; the time taken is measured around the accept."""
-    allowed_s = (datetime.fromisoformat(deadline[:-1]) - datetime.fromisoformat(context.received[:-1])).total_seconds()
-    answers = [a for (_, driver), a in context.answers.items() if driver == driver_id]
-    assert answers == [REFUSED], f"driver {driver_id}: expected refused, the system answered {answers}"
-    assert context.took_s <= allowed_s, f"driver {driver_id}: answer after {context.took_s:.2f} s, allowed {allowed_s:.0f} s"
+    check_answer(context, deadline, driver_id, REFUSED)
+
+
+@then("by {deadline} driver {driver_id} has the answer that the trip is assigned to them")
+def step_assigned_by(context, deadline, driver_id):
+    check_answer(context, deadline, driver_id, ASSIGNED)
 
 
 @then("trip {trip_id} is assigned to driver {driver_id}")
@@ -100,3 +115,33 @@ def step_every_trip(context):
 def step_count_refused(context, n):
     refused = sum(1 for a in context.answers.values() if a == REFUSED)
     assert refused == n, f"expected {n} accepts refused, the system refused {refused}"
+
+
+@when("this completion is received:")
+def step_completion(context):
+    """A completion on the stream: the tracking function keeps the trip's fare; the time taken is measured."""
+    (row,) = list(context.table)
+    started = time.monotonic()
+    done = trips_of(context).complete(row["trip_id"], row["driver_id"], float(row["fare"]))
+    assert done, f"trip {row['trip_id']} is not assigned to {row['driver_id']}: the completion was not kept"
+    context.received, context.took_s = row["received_time"], time.monotonic() - started
+
+
+@when("the rider of trip {trip_id} asks who is coming at {time}")
+def step_rider_asks(context, trip_id, time):
+    context.view = trips_of(context).rider_view(trip_id)
+
+
+@then("the rider is shown driver {driver_id}")
+def step_rider_driver(context, driver_id):
+    assert context.view == {"driver": driver_id}, f"expected driver {driver_id}, the rider is shown {context.view}"
+
+
+@then("by {deadline} the rider of trip {trip_id} is shown the fare {fare:g}")
+def step_rider_fare(context, deadline, trip_id, fare):
+    started = time.monotonic()
+    view = trips_of(context).rider_view(trip_id)
+    took = context.took_s + time.monotonic() - started
+    allowed_s = seconds_between(context.received, deadline)
+    assert view == {"fare": fare}, f"trip {trip_id}: expected the fare {fare}, the rider is shown {view}"
+    assert took <= allowed_s, f"trip {trip_id}: the fare after {took:.2f} s, allowed {allowed_s:.0f} s"

@@ -1,4 +1,5 @@
-sim/data/
 __pycache__/
 .venv/
 .pytest_cache/
+.ruff_cache/
+sim/parquet/
