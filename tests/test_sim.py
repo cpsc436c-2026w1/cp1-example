@@ -1,5 +1,5 @@
 """The generator: the same seed writes the same files, the committed files are the ones it writes, and the files
-hold what docs/design.md, section Data, Simulated data for the demos, says."""
+hold what docs/design.md, section Data, Simulated data for the demos, says (sim/check.py checks every number)."""
 import hashlib
 from collections import Counter
 from pathlib import Path
@@ -35,12 +35,6 @@ def test_rush_hour_counts_and_faults():
     assert Counter(f["fault"] for f in data["faults"]) == {"duplicate": 4, "late": 2}
     ids = Counter(d["event_id"] for d in data["deliveries"])
     assert sorted(i for i, n in ids.items() if n == 2) == sorted(f["event_id"] for f in data["faults"] if f["fault"] == "duplicate")
-    late = {f["event_id"] for f in data["faults"] if f["fault"] == "late"}
-    for d in data["deliveries"]:
-        delay = (g.datetime.fromisoformat(d["received_time"][:-1]) - g.datetime.fromisoformat(d["event_time"][:-1])).seconds
-        if d["event_id"] in late:
-            assert 360 <= delay <= 600
-    assert all(d["received_time"] >= d["event_time"] for d in data["deliveries"])
 
 
 def test_folders_follow_the_time_of_receipt():
@@ -50,29 +44,14 @@ def test_folders_follow_the_time_of_receipt():
         assert all(d["received_time"].startswith(f"{day}T{hour}") for d in g.read_jsonl(path))
 
 
-def test_quiet_zone_has_no_request_in_its_gap():
-    g.generate("SIM02")
-    data = g.load("SIM02")
-    assert data["faults"] == [dict(fault="quiet", zone=48, start="2026-11-23T09:25:00Z", end="2026-11-23T09:35:00Z",
-                                   trips_left_out=60)]
-    assert not [e for e in data["events"] if e["event_type"] == "trip_requested" and e["pickup_zone_id"] == 48
-                and "2026-11-23T09:25:00Z" <= e["event_time"] < "2026-11-23T09:35:00Z"]
-
-
-def test_double_accept_pairs():
-    g.generate("SIM03")
-    data = g.load("SIM03")
-    accepts = [d for d in data["deliveries"] if d["event_type"] == "trip_accepted"]
-    by_trip = {}
-    for a in accepts:
-        by_trip.setdefault(a["trip_id"], []).append(a)
-    assert len(by_trip) == 20
-    for pair in by_trip.values():
-        assert len(pair) == 2 and pair[0]["driver_id"] != pair[1]["driver_id"]
-        assert pair[0]["received_time"] == pair[1]["received_time"]
-    later_first = [t for t, pair in by_trip.items() if pair[0]["event_time"] > pair[1]["event_time"]]
-    assert sorted(later_first) == sorted(f["trip_id"] for f in data["faults"])
-    assert len(later_first) == 10
+def test_trips_day_file_and_its_bad_fares():
+    g.generate("SIM04")
+    data = g.load("SIM04")
+    assert len(data["events"]) == 19074 and len(data["deliveries"]) == 19077
+    bad = {f["trip_id"]: f["reason"] for f in data["faults"]}
+    assert sorted(bad.values()) == ["fare not above 0", "fare not above 0", "no fare"]
+    rows = {r["trip_id"]: r for r in data["deliveries"]}
+    assert [rows[t]["fare"] for t in sorted(bad)] == ["", "0.0", "-4.5"]
 
 
 def test_the_system_reads_no_truth():

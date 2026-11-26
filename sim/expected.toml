@@ -1,0 +1,108 @@
+# The numbers each bullet of docs/design.md, section Data, Simulated data for the demos, states, and the query on
+# the generated files that must give each one. sim/check.py checks both: `says` is in the data set's bullet as
+# written there, and `sql` on the files returns `expect`. A number changed in the bullet, in sim/datasets.py or in
+# the generator, and not in the others, fails the check.
+#
+# Tables: truth (_truth/events.jsonl), faults (_truth/faults.jsonl), deliveries (every JSON Lines file the system
+# receives, with `file`, its path), rows (the CSV file of SIM04). Times are text, ISO 8601 in UTC.
+
+[[SIM01]]
+says = "the 837 trips requested in zones 48, 161 and 230"
+sql = "SELECT count(DISTINCT trip_id) FROM truth WHERE event_type = 'trip_requested'"
+expect = 837
+[[SIM01]]
+says = "304, 191 and 342 trips"
+sql = "SELECT string_agg(n::VARCHAR, ', ' ORDER BY z) FROM (SELECT pickup_zone_id z, count(*) n FROM truth WHERE event_type = 'trip_requested' GROUP BY 1)"
+expect = "304, 191, 342"
+[[SIM01]]
+says = "2,511 events"
+sql = "SELECT count(*) FROM truth"
+expect = 2511
+[[SIM01]]
+says = "sent as 2,515 deliveries"
+sql = "SELECT count(*) FROM deliveries"
+expect = 2515
+[[SIM01]]
+says = "4 requests arrive twice"
+sql = "SELECT count(*) FROM (SELECT event_id FROM deliveries WHERE event_type = 'trip_requested' GROUP BY 1 HAVING count(*) = 2)"
+expect = 4
+[[SIM01]]
+says = "2 arrive 6 to 10 minutes late"
+sql = "SELECT count(*) FROM (SELECT event_id, min(epoch(received_time::TIMESTAMPTZ) - epoch(event_time::TIMESTAMPTZ)) s FROM deliveries GROUP BY 1) WHERE s BETWEEN 360 AND 600"
+expect = 2
+
+[[SIM02]]
+says = "without the 60 trips of zone 48"
+sql = "SELECT max(trips_left_out) FROM faults WHERE fault = 'quiet' AND zone = 48 AND start = '2026-11-23T09:25:00Z' AND \"end\" = '2026-11-23T09:35:00Z'"
+expect = 60
+[[SIM02]]
+says = "777 trips"
+sql = "SELECT count(DISTINCT trip_id) FROM truth WHERE event_type = 'trip_requested'"
+expect = 777
+[[SIM02]]
+says = "(244, 191 and 342 in zones 48, 161 and 230)"
+sql = "SELECT string_agg(n::VARCHAR, ', ' ORDER BY z) FROM (SELECT pickup_zone_id z, count(*) n FROM truth WHERE event_type = 'trip_requested' GROUP BY 1)"
+expect = "244, 191, 342"
+[[SIM02]]
+says = "2,331 events"
+sql = "SELECT count(*) FROM deliveries"
+expect = 2331
+[[SIM02]]
+says = "requested between 09:25 and 09:35"
+sql = "SELECT count(*) FROM deliveries WHERE event_type = 'trip_requested' AND pickup_zone_id = 48 AND event_time >= '2026-11-23T09:25:00Z' AND event_time < '2026-11-23T09:35:00Z'"
+expect = 0
+
+[[SIM03]]
+says = "60 events, 20 requests and 40 accepts"
+sql = "SELECT count(*) || ', ' || count(*) FILTER (WHERE event_type = 'trip_requested') || ', ' || count(*) FILTER (WHERE event_type = 'trip_accepted') FROM deliveries"
+expect = "60, 20, 40"
+[[SIM03]]
+says = "The first 20 trips of zone 161"
+sql = "SELECT count(*) FROM (SELECT trip_id FROM deliveries WHERE event_type = 'trip_accepted' GROUP BY 1 HAVING count(DISTINCT driver_id) = 2 AND count(DISTINCT received_time) = 1)"
+expect = 20
+[[SIM03]]
+says = "for 10 of the 20 trips the later accept is first in the file"
+sql = "SELECT count(*) FROM (SELECT trip_id, arg_min(event_time, line) first, max(event_time) latest FROM (SELECT *, row_number() OVER () line FROM deliveries) WHERE event_type = 'trip_accepted' GROUP BY 1) WHERE first = latest"
+expect = 10
+
+[[SIM04]]
+says = "the 19,074 trips requested in the three zones on 2024-03-14"
+sql = "SELECT count(*) FROM truth"
+expect = 19074
+[[SIM04]]
+says = "1 without a fare"
+sql = "SELECT count(*) FROM rows WHERE fare IS NULL"
+expect = 1
+[[SIM04]]
+says = "1 with a fare of 0"
+sql = "SELECT count(*) FROM rows WHERE fare = 0"
+expect = 1
+[[SIM04]]
+says = "1 with a negative fare"
+sql = "SELECT count(*) FROM rows WHERE fare < 0"
+expect = 1
+[[SIM04]]
+says = "19,077 rows"
+sql = "SELECT count(*) FROM rows"
+expect = 19077
+
+[[SIM05]]
+says = "the 524,629 trips requested in the three zones"
+sql = "SELECT count(*) FROM truth WHERE event_type = 'trip_requested'"
+expect = 524629
+[[SIM05]]
+says = "142,310, 188,010 and 194,309 in zones 48, 161 and 230"
+sql = "SELECT string_agg(n::VARCHAR, ', ' ORDER BY z) FROM (SELECT pickup_zone_id z, count(*) n FROM deliveries GROUP BY 1)"
+expect = "142310, 188010, 194309"
+[[SIM05]]
+says = "moved to 2026-10-24 to 2026-11-22"
+sql = "SELECT strftime(min(event_time::TIMESTAMP), '%Y-%m-%d') || ' ' || strftime(max(event_time::TIMESTAMP), '%Y-%m-%d') FROM truth"
+expect = "2026-10-24 2026-11-22"
+[[SIM05]]
+says = "42,797 files"
+sql = "SELECT count(DISTINCT file) FROM deliveries"
+expect = 42797
+[[SIM05]]
+says = "It does not have injected faults"
+sql = "SELECT count(*) FROM faults"
+expect = 0
