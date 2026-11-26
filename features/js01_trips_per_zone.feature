@@ -100,6 +100,9 @@ Feature: Trips requested in each zone
   Rule: The system shall keep the count by zone over 30 days fast while the stream adds a small file to raw/ every minute
     The count is trips requested in each pickup zone from 2026-10-24 to 2026-11-22, read from the compacted files.
 
+    # @todo: the bucket, the compaction job and Athena are not deployed at Checkpoint 2. The example runs on the local
+    # stand-in (src/rides/compact.py); with TARGET=aws it stops at its second step.
+    @todo
     Example: Thirty days of small files, compacted
       Given the simulated data set SIM05 "raw-30-days"
       And the data set is copied to raw/trip-events/ in the bucket
