@@ -130,19 +130,22 @@ dates they are moved to (*our choice*).
 - **SIM04 Trips day** [R040] One day's file of completed trips from DS01: the 19,074 trips requested in the three
   zones on 2024-03-14 (*measured* 2026-11-20, DuckDB), moved to 2026-11-22, and 3 rows added with a bad fare: 1
   without a fare, 1 with a fare of 0 and 1 with a negative fare. 19,077 rows.
-- **SIM05 Thirty days** [RF040] 30 days of events from DS01: the 524,629 trips requested in the three zones from
+- **SIM05 Thirty days** [RF040] 30 days of requests from DS01: the 524,629 trips requested in the three zones from
   2024-03-01 to 2024-03-30 (142,310, 188,010 and 194,309 in zones 48, 161 and 230, *measured* 2026-11-20, DuckDB),
-  moved to 2026-10-24 to 2026-11-22, as one small file a minute: 43,200 files. It does not have injected faults.
+  moved to 2026-10-24 to 2026-11-22, one `trip_requested` event each, as one small file for each minute of receipt:
+  42,797 files. The minute and the pickup zone of each request come from DS01; its second, rider, dropoff zone and
+  quoted fare are made up (*our choice*). It does not have injected faults. (PR #5)
 
-**Event format** (each delivery also has `received_time`, set when the event arrives):
+**Event format** (each delivery also has `received_time`, set when the event arrives; the field types are the Pydantic
+models of `src/rides/events.py`, every time in UTC written like `2026-11-23T09:00:00Z`; PR #5):
 
-- `trip_requested`: `event_id`, `trip_id`, `pickup_zone_id`, `event_time`
+- `trip_requested`: `event_id`, `trip_id`, `rider_id`, `pickup_zone_id`, `dropoff_zone_id`, `quoted_fare`, `event_time`
 - `trip_accepted`: `event_id`, `trip_id`, `driver_id`, `event_time` (also the body of an accept sent to the API)
-- `trip_completed`: `trip_id`, `driver_id`, `dropoff_zone_id`, `trip_miles`, `trip_time_s`, `fare`, `driver_pay`,
-  `event_time`
+- `trip_completed`: `event_id`, `trip_id`, `driver_id`, `dropoff_zone_id`, `trip_miles`, `trip_time_s`, `fare`,
+  `driver_pay`, `event_time`; a row of the nightly export has the same fields without `event_id` (SIM04)
 
-From a DS01 row come the request time, the pickup and dropoff zones, `trip_miles`, `trip_time_s`, `fare` and
-`driver_pay`. DS01 does not have drivers or accepts, so the generator makes up the rest (*our choice*): `event_id`,
-`trip_id` and `driver_id`; the accept 3 to 15 s after the request; the completion 5 minutes plus the trip time after
-the accept; and `received_time`, 1 s after the event unless a bullet says otherwise. The rider messages of R110 and
-R120 are written by the team.
+From a DS01 row come the request time, the pickup and dropoff zones, `trip_miles`, `trip_time_s`, `fare` (also the
+request's `quoted_fare`) and `driver_pay`. DS01 does not have riders, drivers or accepts, so the generator makes up
+the rest (*our choice*): `event_id`, `trip_id`, `rider_id` and `driver_id`; the accept 3 to 15 s after the request;
+the completion 5 minutes plus the trip time after the accept; and `received_time`, 1 s after the event unless a
+bullet says otherwise. The rider messages of R110 and R120 are written by the team.
