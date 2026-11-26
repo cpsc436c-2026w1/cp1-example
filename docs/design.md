@@ -18,7 +18,9 @@ Each workflow names the IDs it serves in brackets after its name, and the compon
 
 The trips service sends each trip event to the stream. The counting function counts requests by pickup zone in
 5-minute periods and stores each count within 60 s of the period's end (p95); a late request corrects the count of its
-period. It writes each event's id together with the count, so an event delivered twice is counted once.
+period. It writes each request's id and its count in one DynamoDB transaction, so an event delivered twice, or a
+batch that Lambda sends again after a failure, is counted once; a record that fails is reported by its sequence
+number, and Lambda sends the batch again from it, at most 3 times ([review](reviews/well-architected.md), question 1; PR #6).
 
 Components: `t00-trip-events`, `t00-count-requests`, `t00-zone-counts`, `t00-seen-events`
 
@@ -67,7 +69,7 @@ a demo; between runs nothing is kept. The other rows are planned: their scripts,
 
 | Resource | Name | Created by | IDs |
 |---|---|---|---|
-| Kinesis data stream | `t00-trip-events` | `scripts/stream.py up` | R010, R020, RF010, RF050 |
+| Kinesis data stream, provisioned, 1 shard (PR #6) | `t00-trip-events` | `scripts/stream.py up` | R010, R020, RF010, RF050 |
 | Lambda function, Python 3.12 on arm64, 128 MB, at most 1 run at a time | `t00-count-requests` | `scripts/counting.py up` | R010, R020, RF010, RF020, RF050 |
 | Lambda event source mapping, batches of up to 100 records or 1 s, 3 retries | `t00-trip-events` to `t00-count-requests` | `scripts/counting.py up` | R010, R020, RF010 |
 | DynamoDB table, on demand, key `zone_id`, `period_start` | `t00-zone-counts` | `scripts/counting.py up` | R010, R020, R030, RF020, RF050 |
