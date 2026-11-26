@@ -59,29 +59,40 @@ Components: `t00-api`, `t00-assistant`
 ## Resources
 
 Every resource is in ca-central-1, has a name that starts with `t00-` (the Glue database is `t00_lake`, and its tables
-are named without the prefix), and carries the tags `Project=436c`, `Team=t00`, `Owner=<name>` (RF050). The scripts are
-written at Checkpoint 2.
+are named without the prefix), and carries the tags `Project=436c`, `Team=t00`, `Owner=course` (RF050). At
+Checkpoint 2 the counting path of JS01 is deployed: the first six rows, created by `scripts/stream.py up` and
+`scripts/counting.py up`, and deleted by `scripts/teardown.sh --yes`, the stream first. They exist only for a run or
+a demo; between runs nothing is kept. The other rows are planned: their scripts, and their lines in
+`scripts/teardown.sh`, come with them for the final hand-in (PR #3).
 
 | Resource | Name | Created by | IDs |
 |---|---|---|---|
 | Kinesis data stream | `t00-trip-events` | `scripts/stream.py up` | R010, R020, RF010, RF050 |
-| Lambda function | `t00-count-requests` | `scripts/counting.py up` | R010, R020, RF010, RF020, RF050 |
-| DynamoDB table | `t00-zone-counts` | `scripts/counting.py up` | R010, R020, R030, RF020, RF050 |
-| DynamoDB table | `t00-seen-events` | `scripts/counting.py up` | RF010, RF050 |
-| Lambda function | `t00-track-trips` | `scripts/assignment.py up` | R070, R090, R100, RF050 |
-| Lambda function | `t00-assign-trip` | `scripts/assignment.py up` | R070, R080, RF030, RF050 |
-| DynamoDB table | `t00-trips` | `scripts/assignment.py up` | R070, R080, R090, R100, RF030, RF050 |
-| API Gateway HTTP API | `t00-api` | `scripts/api.py up` | R030, R070, R080, R090, R100, R110, R120, RF050 |
-| Lambda function | `t00-read` | `scripts/api.py up` | R030, R090, R100, RF020, RF050 |
-| Firehose stream | `t00-trip-events-to-lake` | `scripts/lake.py up` | RF040, RF050 |
-| S3 bucket | `t00-lake-<account-id>` | `scripts/lake.py up` | R040, R050, RF040, RF050 |
-| Glue database | `t00_lake` | `scripts/lake.py up` | R040, R050, RF040, RF050 |
-| Glue table, in `t00_lake` | `trips_curated` | `scripts/curate.py up` | R040, R050, RF050 |
-| Glue table, in `t00_lake` | `trips_rejected` | `scripts/curate.py up` | R050, RF050 |
-| Glue job | `t00-curate-trips` | `scripts/curate.py up` | R040, R050, RF050 |
-| Glue table, in `t00_lake` | `trip_events_compacted` | `scripts/compact.py up` | RF040, RF050 |
-| Glue job, run every night at 00:30 UTC | `t00-compact-events` | `scripts/compact.py up` | RF040, RF050 |
-| Lambda function (the assistant) | `t00-assistant` | `scripts/assistant.py up` | R110, R120, RF050 |
+| Lambda function, Python 3.12 on arm64, 128 MB, at most 1 run at a time | `t00-count-requests` | `scripts/counting.py up` | R010, R020, RF010, RF020, RF050 |
+| Lambda event source mapping, batches of up to 100 records or 1 s, 3 retries | `t00-trip-events` to `t00-count-requests` | `scripts/counting.py up` | R010, R020, RF010 |
+| DynamoDB table, on demand, key `zone_id`, `period_start` | `t00-zone-counts` | `scripts/counting.py up` | R010, R020, R030, RF020, RF050 |
+| DynamoDB table, on demand, key `event_id`, items expire after 24 hours | `t00-seen-events` | `scripts/counting.py up` | RF010, RF050 |
+| CloudWatch log group, kept 7 days | `/aws/lambda/t00-count-requests` | `scripts/counting.py up` | RF050 |
+| IAM role of the counting function: read the stream, write the two tables and its log group | `t00-count-requests-fn` | the course staff (not deleted by our scripts; a role costs nothing) | RF050 |
+| Lambda function | `t00-track-trips` | planned: `scripts/assignment.py up` | R070, R090, R100, RF050 |
+| Lambda function | `t00-assign-trip` | planned: `scripts/assignment.py up` | R070, R080, RF030, RF050 |
+| DynamoDB table | `t00-trips` | planned: `scripts/assignment.py up` | R070, R080, R090, R100, RF030, RF050 |
+| API Gateway HTTP API | `t00-api` | planned: `scripts/api.py up` | R030, R070, R080, R090, R100, R110, R120, RF050 |
+| Lambda function | `t00-read` | planned: `scripts/api.py up` | R030, R090, R100, RF020, RF050 |
+| Firehose stream | `t00-trip-events-to-lake` | planned: `scripts/lake.py up` | RF040, RF050 |
+| S3 bucket | `t00-lake-<account-id>` | planned: `scripts/lake.py up` | R040, R050, RF040, RF050 |
+| Glue database | `t00_lake` | planned: `scripts/lake.py up` | R040, R050, RF040, RF050 |
+| Glue table, in `t00_lake` | `trips_curated` | planned: `scripts/curate.py up` | R040, R050, RF050 |
+| Glue table, in `t00_lake` | `trips_rejected` | planned: `scripts/curate.py up` | R050, RF050 |
+| Glue job | `t00-curate-trips` | planned: `scripts/curate.py up` | R040, R050, RF050 |
+| Glue table, in `t00_lake` | `trip_events_compacted` | planned: `scripts/compact.py up` | RF040, RF050 |
+| Glue job, run every night at 00:30 UTC | `t00-compact-events` | planned: `scripts/compact.py up` | RF040, RF050 |
+| Lambda function (the assistant) | `t00-assistant` | planned: `scripts/assistant.py up` | R110, R120, RF050 |
+
+What the deployed slice costs while nobody uses it: the stream's shard, 0.0165 USD an hour, 11.88 USD for 30 days
+(price sheet, ca-central-1, 2026-11-18); the tables and the log group bill only what they store (a few kilobytes
+after a run), and the function and its mapping only when records arrive. So the stream is created for a run and
+deleted after it ([Decisions](requirements.md#decisions)).
 
 Outside our system. We do not create these; our system relies on what the last column says.
 
