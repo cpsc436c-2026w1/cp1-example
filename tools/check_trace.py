@@ -9,7 +9,8 @@ table ID -> where defined -> where used. Exit code 1 if there is a problem, else
 The rules:
   1. Every JS, R, RF and RQ ID is defined once in docs/requirements.md: a JS where its heading starts with it
      (## JS01 ...), an R, RF or RQ where a list item starts with it (- **R010** ..., - **RF010** ...).
-  2. Every R or RF line that ends with a Scenario link (`[Scenario](../features/<file>.feature)`) is the tag of a
+  2. Every R or RF line that ends with a Scenario link (`[Scenario](../features/<file>.feature)`, or any other link
+     text into features/, such as `BDD: [<file>.feature](...)` in a table) is the tag of a
      Rule in that feature file. An R or RF line that ends with "Read: ..." (or "Read at Checkpoint 2: ...") must not
      get a rule. An RF line with neither a Scenario link, a Reply [R...] nor Read: is a problem (a testable RF needs
      a rule). An R line without a link and without a rule is listed as "no rule yet", not a problem. (An RF with "Read: ..." and an RQ do not get a rule;
@@ -28,7 +29,8 @@ The rules:
   8. Every Rule has at least one Example (or Scenario) under it.
 
 Tables: an RF or RQ (or R) may also be defined by a table row whose first cell is its ID, as some teams write
-`## Stakeholder input` (| RF010 | ... |); the row is read like a list line (Scenario link, Reply [R...], Read:).
+`## Stakeholder input`, or `## Constraints and requests` as the Checkpoint 1 page first asked (| RF010 | ... |);
+the row is read like a list line (Scenario link, Reply [R...], Read:).
 
 Decisions: a team records its decisions on what a check listed in docs/requirements.md only, one line each, indented
 under the requirement, RF or RQ it concerns, or under a section `## Decisions` naming the item when no requirement
@@ -53,6 +55,8 @@ REQ_LINE = re.compile(r"^\s*[-*+]\s+(?:\*\*`?|`)(R[FQ]?\d+)\b")       # - **R010
 PLAIN_REQ = re.compile(r"^\s*(?:[-*+]\s+|#{2,4}\s+)(R[FQ]?\d+)\b")        # - R010 ..., ### R010 ...: a mention, not a definition
 JS_LINE = re.compile(r"^#{1,3}\s+\**`?(JS\d+)\b")                         # ## JS01 Driver: ..., # JS01, ### JS01
 READ = re.compile(r"\bRead(?: at Checkpoint 2)?:")
+# The Checkpoint 1 page first asked for "## Constraints and requests" (a table), later for "## Stakeholder input".
+STAKEHOLDER_HEADINGS = ("## stakeholder input", "## constraints and requests")
 TABLE_ROW = re.compile(r"^\s*\|\s*(?:\*\*`?|`)?(R[FQ]?\d+)\b")             # | RF010 | ... | or | **RF010** | ...
 DECISION_START = re.compile(r"^\s*(?:[-*+]\s+|#\s*)?Decision\s*\(", re.I)
 DECISION = re.compile(r"^\s*(?:[-*+]\s+|#\s*)?Decision \((?P<check>[\w-]+) (?P<question>[A-Z]{2}\d+)(?:, (?!PR #)(?P<about>[^,)]+))?(?:, PR #(?P<pr>\d+))?\):"
@@ -92,7 +96,7 @@ def read_requirements(path: Path, problems: list[str]) -> tuple[dict, dict, dict
     stakeholder_input = False
     for n, line in enumerate(read_text(path).splitlines(), 1):
         if line.startswith(("# ", "## ")):
-            stakeholder_input = line.strip().casefold() == "## stakeholder input"
+            stakeholder_input = line.strip().casefold() in STAKEHOLDER_HEADINGS
         if DECISION_START.match(line):
             place = f"requirements.md:{n}"
             before = len(DECISIONS)
@@ -120,7 +124,8 @@ def read_requirements(path: Path, problems: list[str]) -> tuple[dict, dict, dict
             define(code, n)
             if code.startswith("RQ"):                               # a request: a Reply, no rule
                 continue
-            link = re.search(r"\[Scenario\]\((?:\.\./)?features/([^)]+\.feature)\)", line)
+            # Any link into features/ counts: [Scenario](...), or BDD: [<file>.feature](...) as the first Checkpoint 1 table had
+            link = re.search(r"\[[^\]\n]*\]\((?:\.\./)?features/([^)]+\.feature)\)", line)
             if READ.search(line) and not link:
                 read_only[code] = f"requirements.md:{n}"            # a test cannot check it: no rule
             elif link:
