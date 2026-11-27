@@ -81,6 +81,21 @@ def read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8-sig")
 
 
+def logical_lines(text: str) -> list[tuple[int, str]]:
+    """(line number, line) with a wrapped list item joined: an indented line under a list item continues it, unless
+    it starts a list item, a Decision line, a table row or a heading of its own. Teams wrap long requirement lines,
+    and the Scenario link, Reply or Read: of an RF often sits on a continuation line."""
+    out: list[list] = []
+    for n, line in enumerate(text.splitlines(), 1):
+        s = line.strip()
+        if (out and line[:1].isspace() and s and re.match(r"^\s*[-*+]\s", out[-1][1])
+                and not re.match(r"([-*+]|\d+[.)])\s|Decision\s*\(|\||#", s)):
+            out[-1][1] += " " + s
+            continue
+        out.append([n, line])
+    return [(n, l) for n, l in out]
+
+
 def read_requirements(path: Path, problems: list[str]) -> tuple[dict, dict, dict]:
     """Returns ({code: "requirements.md:12"}, {code that must have a Rule: the feature file its Scenario link, or None},
     {code whose line ends with Read: and must not have a Rule: its place})."""
@@ -94,7 +109,7 @@ def read_requirements(path: Path, problems: list[str]) -> tuple[dict, dict, dict
 
     last = ""
     stakeholder_input = False
-    for n, line in enumerate(read_text(path).splitlines(), 1):
+    for n, line in logical_lines(read_text(path)):
         if line.startswith(("# ", "## ")):
             stakeholder_input = line.strip().casefold() in STAKEHOLDER_HEADINGS
         if DECISION_START.match(line):
