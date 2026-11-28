@@ -10,7 +10,8 @@ The rules:
   1. Every JS, R, RF and RQ ID is defined once in docs/requirements.md: a JS where its heading starts with it
      (## JS01 ...), an R, RF or RQ where a list item starts with it (- **R010** ..., - **RF010** ...).
   2. Every R or RF line that ends with a Scenario link (`[Scenario](../features/<file>.feature)`, or any other link
-     text into features/, such as `BDD: [<file>.feature](...)` in a table) is the tag of a
+     text into features/, such as `BDD: [<file>.feature](...)` in a table, or a link from the repository root,
+     `(/features/<file>.feature)`) is the tag of a
      Rule in that feature file. An R or RF line that ends with "Read: ..." (or "Read at Checkpoint 2: ...") must not
      get a rule. An RF line with neither a Scenario link, a Reply [R...] nor Read: is a problem (a testable RF needs
      a rule). An R line without a link and without a rule is listed as "no rule yet", not a problem. (An RF with "Read: ..." and an RQ do not get a rule;
@@ -84,12 +85,14 @@ def read_text(path: Path) -> str:
 def logical_lines(text: str) -> list[tuple[int, str]]:
     """(line number, line) with a wrapped list item joined: an indented line under a list item continues it, unless
     it starts a list item, a Decision line, a table row or a heading of its own. Teams wrap long requirement lines,
-    and the Scenario link, Reply or Read: of an RF often sits on a continuation line."""
+    and the Scenario link, Reply or Read: of an RF often sits on a continuation line. An indented sub-bullet that
+    starts with Reply or Read (bold or not, `  - **Reply** [R040]: ...`) also belongs to the item above it."""
     out: list[list] = []
     for n, line in enumerate(text.splitlines(), 1):
         s = line.strip()
+        reply_sub = re.match(r"[-*+]\s+(\*\*|__)?\s*(Reply|Read)\b", s, re.I)
         if (out and line[:1].isspace() and s and re.match(r"^\s*[-*+]\s", out[-1][1])
-                and not re.match(r"([-*+]|\d+[.)])\s|Decision\s*\(|\||#", s)):
+                and (reply_sub or not re.match(r"([-*+]|\d+[.)])\s|Decision\s*\(|\||#", s))):
             out[-1][1] += " " + s
             continue
         out.append([n, line])
@@ -140,12 +143,12 @@ def read_requirements(path: Path, problems: list[str]) -> tuple[dict, dict, dict
             if code.startswith("RQ"):                               # a request: a Reply, no rule
                 continue
             # Any link into features/ counts: [Scenario](...), or BDD: [<file>.feature](...) as the first Checkpoint 1 table had
-            link = re.search(r"\[[^\]\n]*\]\((?:\.\./)?features/([^)]+\.feature)\)", line)
+            link = re.search(r"\[[^\]\n]*\]\((?:\.\./|\./|/)?features/([^)]+\.feature)\)", line)
             if READ.search(line) and not link:
                 read_only[code] = f"requirements.md:{n}"            # a test cannot check it: no rule
             elif link:
                 needs_rule[code] = link.group(1)
-            elif code.startswith("RF") and not re.search(r"Reply \[R\d+", line):
+            elif code.startswith("RF") and not re.search(r"Reply\W{0,6}\[R\d+", line):
                 problems.append(f"requirements.md:{n}: {code} has no [Scenario](...) link, no Reply [R...] and no "
                                 "Read: (a testable RF needs a rule and a Scenario link; one a test cannot check ends "
                                 "with Read:)")
